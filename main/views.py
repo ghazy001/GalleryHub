@@ -9,6 +9,9 @@ from django.utils import timezone
 from gallery.models import Artwork, ArtworkFeedback
 from gallery.forms import ArtworkFeedbackForm
 from django.contrib import messages
+from django.shortcuts import render, get_object_or_404
+from django.utils import timezone
+from workshops.models import Workshop
 
 def index(request):
     return render(request, 'main/index.html')
@@ -147,3 +150,37 @@ def public_artwork_detail_view(request, artwork_id):
         'initial_name': initial_name,
     }
     return render(request, 'main/artwork/public_artwork_detail.html', context)
+
+
+
+
+# ---------------------- workshops --------------------------
+
+
+
+def public_workshop_list_view(request):
+    now = timezone.now()
+    # active and in the future or ongoing
+    workshops = (
+        Workshop.objects
+        .filter(is_active=True, end_time__gte=now)
+        .select_related('place')
+        .prefetch_related('materials')
+        .order_by('start_time')
+    )
+
+    return render(request, 'main/workshops/public_workshop_list.html', {
+        'workshops': workshops
+    })
+
+
+def public_workshop_detail_view(request, workshop_id):
+    workshop = get_object_or_404(
+        Workshop.objects.select_related('place').prefetch_related('materials'),
+        id=workshop_id,
+        is_active=True
+    )
+
+    return render(request, 'main/workshops/public_workshop_detail.html', {
+        'workshop': workshop
+    })

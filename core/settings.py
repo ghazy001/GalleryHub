@@ -46,7 +46,8 @@ INSTALLED_APPS = [
     "dashboard",
     "events",
     "blog",
-    "gallery"
+    "gallery",
+    "workshops"
 
 ]
 

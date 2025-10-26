@@ -1,0 +1,66 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>{{ workshop.title }}</title>
+
+    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+</head>
+<body>
+
+{% include "main/partials/_header.html" %}
+
+<section class="section-gap" style="padding-top:60px;">
+  <div class="container" style="max-width:900px;">
+
+    <a href="{% url 'public_workshop_list' %}"
+       style="text-decoration:underline; font-size:14px; color:#555;">
+        ← Back to Workshops
+    </a>
+
+    <div style="margin-top:20px;">
+        <h1 style="font-weight:600; margin-bottom:10px;">
+            {{ workshop.title }}
+        </h1>
+
+        <p style="color:#888; font-size:14px; margin-bottom:15px;">
+            {% if workshop.instructor %}Instructor: {{ workshop.instructor }} · {% endif %}
+            {{ workshop.place.name }}<br>
+            {{ workshop.start_time }} → {{ workshop.end_time }}<br>
+            Capacity: {{ workshop.capacity }}
+        </p>
+
+        <div style="font-size:16px; line-height:1.6; color:#222; margin-bottom:30px;">
+            {{ workshop.description|linebreaks }}
+        </div>
+
+        <h3 style="font-size:18px; font-weight:600; margin-bottom:10px;">Materials Needed</h3>
+        {% if workshop.materials.all %}
+            <ul style="padding-left:18px;">
+            {% for m in workshop.materials.all %}
+                <li style="margin-bottom:6px;">
+                    <strong>{{ m.name }}</strong>
+                    {% if m.unit %} ({{ m.unit }}){% endif %}
+                    {% if m.description %}
+                        <br><span style="font-size:13px; color:#555;">{{ m.description }}</span>
+                    {% endif %}
+                </li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p style="color:#777;">No special materials required, just show up 🙂</p>
+        {% endif %}
+    </div>
+
+  </div>
+</section>
+
+{% include "main/partials/_footer.html" %}
+
+<script src="{% static 'js/vendor/jquery-2.2.4.min.js' %}"></script>
+<script src="{% static 'js/vendor/bootstrap.min.js' %}"></script>
+<script src="{% static 'js/main.js' %}"></script>
+</body>
+</html>

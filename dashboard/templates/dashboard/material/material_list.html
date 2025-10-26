@@ -1,0 +1,74 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Materials</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'dashboard/css/styles.css' %}">
+</head>
+<body>
+<div class="grid-container">
+
+    {% include "dashboard/partials/header.html" %}
+    {% include "dashboard/partials/sidebar.html" %}
+
+    <main class="main-container">
+        <div class="main-title">
+            <h2>MATERIALS</h2>
+            <a href="{% url 'dashboard_material_create' %}"
+               style="background:#1c1c1c;color:#fff;padding:8px 12px;border-radius:4px;font-size:14px;">
+               + Add Material
+            </a>
+        </div>
+
+        <div class="charts-card" style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse; font-size:14px;">
+                <thead>
+                    <tr style="border-bottom:2px solid #ddd;text-align:left;">
+                        <th style="padding:10px;">Name</th>
+                        <th style="padding:10px;">Stock</th>
+                        <th style="padding:10px;">Unit</th>
+                        <th style="padding:10px;">Description</th>
+                        <th style="padding:10px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for m in materials %}
+                    <tr style="border-bottom:1px solid #eee;">
+                        <td style="padding:10px;">{{ m.name }}</td>
+                        <td style="padding:10px;">{{ m.stock_quantity }}</td>
+                        <td style="padding:10px;">{{ m.unit|default:"—" }}</td>
+                        <td style="padding:10px;">{{ m.description|truncatechars:80 }}</td>
+                        <td style="padding:10px;white-space:nowrap;">
+                            <a href="{% url 'dashboard_material_edit' m.id %}"
+                               style="padding:6px 10px;background:#3498db;color:#fff;border-radius:4px;font-size:12px;">Edit</a>
+
+                            <form method="post"
+                                  action="{% url 'dashboard_material_delete' m.id %}"
+                                  style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit"
+                                        onclick="return confirm('Delete material {{ m.name }} ?');"
+                                        style="padding:6px 10px;background:#e74c3c;color:#fff;border:none;border-radius:4px;font-size:12px;cursor:pointer;">
+                                    Delete
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5" style="padding:20px;color:#666;text-align:center;">
+                            No materials yet.
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+
+<script src="{% static 'dashboard/js/scripts.js' %}"></script>
+</body>
+</html>

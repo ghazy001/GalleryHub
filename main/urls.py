@@ -14,6 +14,9 @@ urlpatterns = [
     path('artworks/', views.public_artwork_list_view, name='public_artwork_list'),
     path('artworks/<int:artwork_id>/', views.public_artwork_detail_view, name='public_artwork_detail'),
 
+    path('workshops', views.public_workshop_list_view, name='public_workshop_list'),
+    path('workshops/<int:workshop_id>/', views.public_workshop_detail_view, name='public_workshop_detail'),
+
 
 
 

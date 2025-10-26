@@ -20,5 +20,8 @@ urlpatterns = [
     # gallery (artworks / feedback)
     path('', include('gallery.dashboard_urls')),
 
+    # workshops (materials / workshops)
+    path('', include('workshops.dashboard_urls')),
+
 
 ]

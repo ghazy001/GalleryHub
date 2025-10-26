@@ -32,7 +32,7 @@ def user_list_view(request):
         "users": users,
         "search_query": q,
     }
-    return render(request, 'dashboard/users.html', context)
+    return render(request, 'dashboard/users/users.html', context)
 
 
 @login_required

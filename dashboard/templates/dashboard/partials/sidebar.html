@@ -1,0 +1,54 @@
+<aside id="sidebar">
+  <div class="sidebar-title">
+    <div class="sidebar-brand">
+      <span class="material-icons-outlined">shopping_cart</span> STORE
+    </div>
+    <span class="material-icons-outlined" onclick="closeSidebar()">close</span>
+  </div>
+
+  <ul class="sidebar-list">
+
+    <li class="sidebar-list-item">
+      <a href="{% url 'dashboard' %}">
+        <span class="material-icons-outlined">dashboard</span> Dashboard
+      </a>
+    </li>
+
+    <li class="sidebar-list-item">
+      <a href="{% url 'dashboard_user_list' %}">
+        <span class="material-icons-outlined">groups</span> Users
+      </a>
+    </li>
+
+    <li class="sidebar-list-item">
+      <a href="{% url 'dashboard_place_list' %}">
+        <span class="material-icons-outlined">location_on</span> Places
+      </a>
+    </li>
+
+    <li class="sidebar-list-item">
+      <a href="{% url 'dashboard_event_list' %}">
+        <span class="material-icons-outlined">event</span> Events
+      </a>
+    </li>
+
+    <li class="sidebar-list-item">
+      <a href="{% url 'dashboard_category_list' %}">
+        <span class="material-icons-outlined">category</span> Categories
+      </a>
+    </li>
+
+    <li class="sidebar-list-item">
+      <a href="{% url 'dashboard_article_list' %}">
+        <span class="material-icons-outlined">description</span> Articles
+      </a>
+    </li>
+
+    <li class="sidebar-list-item">
+      <a href="{% url 'logout' %}">
+        <span class="material-icons-outlined">logout</span> Logout
+      </a>
+    </li>
+
+  </ul>
+</aside>

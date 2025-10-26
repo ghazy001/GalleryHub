@@ -1,0 +1,96 @@
+{% load static %}
+
+<header id="header" id="home">
+    <div class="container header-top">
+        <div class="row">
+            <div class="col-6 top-head-left">
+                {% if request.user.is_authenticated %}
+                    Welcome {{ request.user.username }}
+                    {% if request.user.is_staff or request.user.is_superuser %}
+                        <span style="font-size:12px; color:#fff; background:#e67e22; padding:2px 6px; border-radius:3px; margin-left:6px;">
+                            Admin
+                        </span>
+                    {% endif %}
+                {% else %}
+                    <a href="{% url 'login' %}" style="color:#fff; text-decoration:underline;">
+                        Sign in
+                    </a>
+                    /
+                    <a href="{% url 'register' %}" style="color:#fff; text-decoration:underline;">
+                        Register
+                    </a>
+                {% endif %}
+            </div>
+
+            <div class="col-6 top-head-right">
+                <ul>
+                    <li><a href="#"><i class="fa fa-facebook"></i></a></li>
+                    <li><a href="#"><i class="fa fa-twitter"></i></a></li>
+                    <li><a href="#"><i class="fa fa-dribbble"></i></a></li>
+                    <li><a href="#"><i class="fa fa-behance"></i></a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="container">
+        <div class="row align-items-center justify-content-between d-flex">
+            <div id="logo">
+                <a href="/"><img src="{% static 'img/logo.png' %}" alt="Logo" title="Home" /></a>
+            </div>
+
+            <nav id="nav-menu-container">
+                <ul class="nav-menu">
+                    <li class="menu-active"><a href="/">Home</a></li>
+                    <li><a href="#">About</a></li>
+                    <li><a href="#gallery">Gallery</a></li>
+                    <li><a href="{% url 'public_events_list' %}">Events</a></li>
+                    <li><a href="{% url 'public_article_list' %}">Blog</a></li>
+                    <li><a href="#contact">Contact</a></li>
+
+                    <li class="menu-has-children"><a href="">Pages</a>
+                        <ul>
+                            <li><a href="#">Blog Single</a></li>
+                            <li><a href="#">Category</a></li>
+                            <li><a href="#">Elements</a></li>
+                        </ul>
+                    </li>
+
+                    {% if request.user.is_authenticated %}
+                        {% if request.user.is_staff or request.user.is_superuser %}
+                            <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                        {% endif %}
+
+                        <li><a href="{% url 'profile' %}">Profile</a></li>
+
+                        <li>
+                            <a href="{% url 'logout' %}"
+                               style="background:#e74c3c; color:#fff; padding:8px 14px; border-radius:3px; display:inline-block;">
+                                Logout
+                            </a>
+                        </li>
+                    {% else %}
+                        <li>
+                            <a href="{% url 'login' %}"
+                               style="background:#1c1c1c; color:#fff; padding:8px 14px; border-radius:3px; display:inline-block;">
+                                Login
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+</header>
+
+
+<style>
+    @media (max-width: 991px) {
+        #header { background: rgba(0,0,0,0.9) !important; }
+    }
+    body:not(.home-page) #header {
+        background: rgba(0,0,0,0.9) !important;
+    }
+</style>

@@ -1,0 +1,333 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Art Gallery</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .brush-stroke {
+            position: fixed;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        .brush-stroke:nth-child(1) {
+            top: 10%;
+            left: 10%;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a6f);
+        }
+
+        .brush-stroke:nth-child(2) {
+            bottom: 20%;
+            right: 15%;
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            animation-delay: 2s;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.3) rotate(180deg); }
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            padding: 50px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 10;
+            animation: slideIn 0.8s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeIn 1s ease-out 0.3s both;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .avatar-wrapper {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 25px;
+        }
+
+        .avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid #fff;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .avatar:hover {
+            transform: scale(1.05);
+        }
+
+        .avatar-badge {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            border: 3px solid #fff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        h2 {
+            color: #333;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .profile-info {
+            background: #f8f9fa;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            animation: fadeIn 1s ease-out 0.5s both;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-icon {
+            font-size: 20px;
+            margin-right: 15px;
+            width: 30px;
+            text-align: center;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #555;
+            margin-right: 10px;
+        }
+
+        .info-value {
+            color: #333;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 14px;
+            margin: 20px 0;
+            animation: fadeIn 1s ease-out 0.7s both;
+        }
+
+        .status-active {
+            background: linear-gradient(135deg, #51cf66, #37b24d);
+            color: white;
+        }
+
+        .status-banned {
+            background: linear-gradient(135deg, #ff6b6b, #fa5252);
+            color: white;
+        }
+
+        .actions {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+            animation: fadeIn 1s ease-out 0.9s both;
+        }
+
+        .btn {
+            flex: 1;
+            min-width: 150px;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 15px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffd43b, #fab005);
+            color: #333;
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(250, 176, 5, 0.4);
+        }
+
+        .danger-zone {
+            background: #fff5f5;
+            border: 2px dashed #ff6b6b;
+            border-radius: 20px;
+            padding: 25px;
+            margin-top: 30px;
+            animation: fadeIn 1s ease-out 1.1s both;
+        }
+
+        .danger-zone h3 {
+            color: #c92a2a;
+            font-size: 18px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b, #fa5252);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(255, 107, 107, 0.4);
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 20px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            animation: fadeIn 1s ease-out 1.3s both;
+        }
+
+        .back-link:hover {
+            transform: translateX(-5px);
+        }
+    </style>
+</head>
+<body>
+    <div class="brush-stroke"></div>
+    <div class="brush-stroke"></div>
+
+    <div class="container">
+        <div class="profile-header">
+            <div class="avatar-wrapper">
+                {% if user_obj.avatar %}
+                    <img src="{{ user_obj.avatar.url }}" alt="{{ user_obj.username }}'s profile picture" class="avatar">
+                {% else %}
+                    <img src="{% static 'img/default-avatar.png' %}" alt="default avatar" class="avatar">
+                {% endif %}
+                <div class="avatar-badge">🎨</div>
+            </div>
+            <h2>Hi, {{ user_obj.username }}!</h2>
+            
+            {% if user_obj.is_banned %}
+                <div class="status-badge status-banned">⚠️ Account Banned</div>
+            {% else %}
+                <div class="status-badge status-active">✓ Active Account</div>
+            {% endif %}
+        </div>
+
+        <div class="profile-info">
+            <div class="info-item">
+                <span class="info-icon">📧</span>
+                <span class="info-label">Email:</span>
+                <span class="info-value">{{ user_obj.email }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-icon">📝</span>
+                <span class="info-label">Bio:</span>
+                <span class="info-value">{{ user_obj.bio|default:"No bio yet" }}</span>
+            </div>
+        </div>
+
+        <div class="actions">
+            <a href="{% url 'profile_edit' %}" class="btn btn-primary">
+                ✏️ Edit Profile
+            </a>
+            <a href="{% url 'logout' %}" class="btn btn-warning">
+                🚪 Logout
+            </a>
+        </div>
+
+        <div class="danger-zone">
+            <h3>⚠️ Danger Zone</h3>
+            <form method="post" action="{% url 'delete_account' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">🗑️ Delete My Account</button>
+            </form>
+        </div>
+
+        <a href="{% url 'index' %}" class="back-link">← Back to home</a>
+    </div>
+</body>
+</html>

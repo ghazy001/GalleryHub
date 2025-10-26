@@ -1,0 +1,428 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{ event.title }}</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+
+    <style>
+        body {
+            background: #f8f9fa;
+        }
+
+        .event-hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 100px 0 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .event-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.3;
+        }
+
+        .event-hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .back-link-hero {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50px;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+
+        .back-link-hero:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateX(-5px);
+            text-decoration: none;
+            color: white;
+        }
+
+        .back-link-hero::before {
+            content: '←';
+            margin-right: 8px;
+            font-size: 18px;
+        }
+
+        .event-title {
+            color: white;
+            font-size: 3.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 30px;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .event-meta-hero {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            animation: fadeInUp 0.8s ease 0.2s backwards;
+        }
+
+        .meta-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 20px 25px;
+            min-width: 200px;
+        }
+
+        .meta-icon {
+            font-size: 28px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .meta-label {
+            display: block;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .meta-value {
+            display: block;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .event-content-section {
+            padding: 60px 0 80px;
+        }
+
+        .event-content-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            padding: 60px;
+            margin-top: -60px;
+            position: relative;
+            z-index: 2;
+            animation: fadeInUp 0.8s ease 0.4s backwards;
+        }
+
+        .event-description {
+            font-size: 1.125rem;
+            line-height: 1.8;
+            color: #2d3748;
+            max-width: 900px;
+        }
+
+        .event-description p {
+            margin-bottom: 1.5rem;
+        }
+
+        .location-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 20px;
+            padding: 40px;
+            margin-top: 40px;
+        }
+
+        .location-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .location-title::before {
+            content: '📍';
+            font-size: 32px;
+            margin-right: 15px;
+        }
+
+        .location-details {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .location-item {
+            display: flex;
+            align-items: flex-start;
+            font-size: 16px;
+            color: #4a5568;
+        }
+
+        .location-item-icon {
+            min-width: 30px;
+            font-size: 20px;
+            margin-right: 12px;
+        }
+
+        .location-item strong {
+            color: #2d3748;
+            margin-right: 8px;
+        }
+
+        .capacity-badge {
+            display: inline-flex;
+            align-items: center;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: 600;
+            color: #667eea;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-top: 15px;
+        }
+
+        .capacity-badge::before {
+            content: '👥';
+            margin-right: 10px;
+            font-size: 20px;
+        }
+
+        /* Map Styling */
+        .map-container {
+            margin-top: 40px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            animation: fadeInUp 0.8s ease 0.6s backwards;
+        }
+
+        .map-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px 30px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .map-header h3 {
+            margin: 0;
+            font-size: 1.3rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+
+        .map-header h3::before {
+            content: '🗺️';
+            font-size: 28px;
+            margin-right: 12px;
+        }
+
+        .map-directions-btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 25px;
+            color: white;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .map-directions-btn:hover {
+            background: white;
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .map-directions-btn::before {
+            content: '🧭';
+            margin-right: 6px;
+        }
+
+        .map-iframe-wrapper {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+        }
+
+        .map-iframe-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .event-title {
+                font-size: 2.5rem;
+            }
+
+            .event-hero {
+                padding: 80px 0 60px;
+            }
+
+            .event-content-card {
+                padding: 30px 20px;
+                border-radius: 15px;
+            }
+
+            .event-meta-hero {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .meta-card {
+                min-width: 100%;
+            }
+
+            .location-card {
+                padding: 25px;
+            }
+
+            .map-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+
+{% include "main/partials/_header.html" %}
+
+<section class="event-hero">
+    <div class="container">
+        <div class="event-hero-content">
+            <a href="{% url 'public_events_list' %}" class="back-link-hero">
+                Back to all events
+            </a>
+
+            <h1 class="event-title">{{ event.title }}</h1>
+
+            <div class="event-meta-hero">
+                <div class="meta-card">
+                    <span class="meta-icon">📅</span>
+                    <span class="meta-label">Event Dates</span>
+                    <span class="meta-value">{{ event.start_date }} — {{ event.end_date }}</span>
+                </div>
+
+                <div class="meta-card">
+                    <span class="meta-icon">📍</span>
+                    <span class="meta-label">Location</span>
+                    <span class="meta-value">{{ event.place.name }}<br>{{ event.place.city }}</span>
+                </div>
+
+                {% if event.place.capacity %}
+                <div class="meta-card">
+                    <span class="meta-icon">👥</span>
+                    <span class="meta-label">Capacity</span>
+                    <span class="meta-value">{{ event.place.capacity }} guests</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="event-content-section">
+    <div class="container">
+        <div class="event-content-card">
+            <div class="event-description">
+                {{ event.description|linebreaks }}
+            </div>
+
+            <div class="location-card">
+                <h3 class="location-title">Venue Information</h3>
+                <div class="location-details">
+                    <div class="location-item">
+                        <span class="location-item-icon">🏛️</span>
+                        <span><strong>Venue:</strong> {{ event.place.name }}</span>
+                    </div>
+
+                    {% if event.place.address %}
+                    <div class="location-item">
+                        <span class="location-item-icon">🗺️</span>
+                        <span><strong>Address:</strong> {{ event.place.address }}</span>
+                    </div>
+                    {% endif %}
+
+                    <div class="location-item">
+                        <span class="location-item-icon">🌆</span>
+                        <span><strong>City:</strong> {{ event.place.city }}</span>
+                    </div>
+
+                    {% if event.place.capacity %}
+                    <div class="location-item">
+                        <span class="capacity-badge">Maximum capacity: {{ event.place.capacity }} people</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Google Maps Embed - NO API KEY NEEDED -->
+            <div class="map-container">
+                <div class="map-header">
+                    <h3>Find Us Here</h3>
+                    <a href="https://www.google.com/maps/search/?api=1&query={{ event.place.name|urlencode }}+{{ event.place.city|urlencode }}{% if event.place.address %}+{{ event.place.address|urlencode }}{% endif %}"
+                       target="_blank"
+                       class="map-directions-btn">
+                        Get Directions
+                    </a>
+                </div>
+                <div class="map-iframe-wrapper">
+                    <iframe
+                        loading="lazy"
+                        allowfullscreen
+                        referrerpolicy="no-referrer-when-downgrade"
+                        src="https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q={{ event.place.name|urlencode }}+{{ event.place.city|urlencode }}{% if event.place.address %}+{{ event.place.address|urlencode }}{% endif %}&zoom=15">
+                    </iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% include "main/partials/_footer.html" %}
+
+<script src="{% static 'js/vendor/jquery-2.2.4.min.js' %}"></script>
+<script src="{% static 'js/vendor/bootstrap.min.js' %}"></script>
+<script src="{% static 'js/main.js' %}"></script>
+
+</body>
+</html>

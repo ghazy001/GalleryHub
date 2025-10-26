@@ -1,0 +1,142 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>User Management</title>
+
+    <!-- Fonts / Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+    <!-- Dashboard CSS -->
+    <link rel="stylesheet" href="{% static 'dashboard/css/styles.css' %}">
+  </head>
+  <body>
+    <div class="grid-container">
+
+       {% include "dashboard/partials/header.html" %}
+       {% include "dashboard/partials/sidebar.html" %}
+      <!-- Main content -->
+      <main class="main-container">
+
+        <div class="main-title">
+          <h2>USER MANAGEMENT</h2>
+          <p style="font-size:14px;color:#666;margin-top:4px;">
+            Logged in as {{ request.user.username }}
+          </p>
+        </div>
+
+        <!-- Search form -->
+        <form method="get" style="margin-bottom:20px; display:flex; gap:10px; flex-wrap:wrap;">
+          <input
+            type="text"
+            name="q"
+            value="{{ search_query }}"
+            placeholder="Search username or email..."
+            style="padding:8px 12px; border:1px solid #ccc; border-radius:4px; flex:1; min-width:200px;"
+          >
+          <button type="submit" style="padding:8px 16px; border:none; background:#333; color:#fff; border-radius:4px; cursor:pointer;">
+            <span class="material-icons-outlined" style="font-size:16px; vertical-align:middle;">search</span>
+            Search
+          </button>
+        </form>
+
+        <!-- Users table -->
+        <div class="charts-card" style="overflow-x:auto;">
+          <h2 class="chart-title" style="margin-bottom:16px;">All Users</h2>
+
+          <table style="width:100%; border-collapse:collapse; font-size:14px;">
+            <thead>
+              <tr style="text-align:left; border-bottom:2px solid #ddd;">
+                <th style="padding:10px;">ID</th>
+                <th style="padding:10px;">Username</th>
+                <th style="padding:10px;">Email</th>
+                <th style="padding:10px;">Staff?</th>
+                <th style="padding:10px;">Banned?</th>
+                <th style="padding:10px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for u in users %}
+              <tr style="border-bottom:1px solid #eee;">
+                <td style="padding:10px; white-space:nowrap;">{{ u.id }}</td>
+                <td style="padding:10px;">{{ u.username }}</td>
+                <td style="padding:10px;">{{ u.email }}</td>
+                <td style="padding:10px;">
+                  {% if u.is_staff or u.is_superuser %}
+                    <span style="color:green; font-weight:600;">YES</span>
+                  {% else %}
+                    <span style="color:#999;">no</span>
+                  {% endif %}
+                </td>
+                <td style="padding:10px;">
+                  {% if u.is_banned %}
+                    <span style="color:#c00; font-weight:600;">BANNED</span>
+                  {% else %}
+                    <span style="color:green; font-weight:600;">Active</span>
+                  {% endif %}
+                </td>
+                <td style="padding:10px; white-space:nowrap; display:flex; flex-wrap:wrap; gap:8px;">
+
+                  <!-- Ban / Unban -->
+                  {% if u.id != request.user.id %}
+                  <form method="post" action="{% url 'dashboard_user_ban_toggle' u.id %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit"
+                      style="padding:6px 10px; border:none; border-radius:4px; cursor:pointer;
+                             background:{% if u.is_banned %}#4caf50{% else %}#f39c12{% endif %};
+                             color:#fff; font-size:12px; font-weight:600;">
+                      {% if u.is_banned %}Unban{% else %}Ban{% endif %}
+                    </button>
+                  </form>
+                  {% else %}
+                  <button disabled
+                    style="padding:6px 10px; border:none; border-radius:4px; font-size:12px;
+                           background:#ccc; color:#666;">
+                    Ban
+                  </button>
+                  {% endif %}
+
+                  <!-- Delete -->
+                  {% if u.id != request.user.id %}
+                  <form method="post" action="{% url 'dashboard_user_delete' u.id %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit"
+                      style="padding:6px 10px; border:none; border-radius:4px; cursor:pointer;
+                             background:#e74c3c; color:#fff; font-size:12px; font-weight:600;"
+                      onclick="return confirm('Delete user {{ u.username }} ?');">
+                      Delete
+                    </button>
+                  </form>
+                  {% else %}
+                  <button disabled
+                    style="padding:6px 10px; border:none; border-radius:4px; font-size:12px;
+                           background:#ccc; color:#666;">
+                    Delete
+                  </button>
+                  {% endif %}
+
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="6" style="padding:20px; text-align:center; color:#666;">
+                  No users found.
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+      </main>
+      <!-- End main content -->
+
+    </div>
+
+    <!-- Include same dashboard JS -->
+    <script src="{% static 'dashboard/js/scripts.js' %}"></script>
+  </body>
+</html>

@@ -1,0 +1,272 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>{{ article.title }}</title>
+
+    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+
+    <style>
+        body {
+            background: #f8f9fa;
+        }
+
+        .article-hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 80px 0 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .article-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.3;
+        }
+
+        .article-meta {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .article-meta span {
+            margin: 0 10px;
+            opacity: 0.7;
+        }
+
+        .article-title {
+            color: white;
+            font-size: 3rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 1;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .article-summary {
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 1.3rem;
+            line-height: 1.6;
+            font-weight: 300;
+            font-style: italic;
+            max-width: 800px;
+            position: relative;
+            z-index: 1;
+            animation: fadeInUp 0.8s ease 0.2s backwards;
+        }
+
+        .article-content-wrapper {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            padding: 60px;
+            margin-top: -40px;
+            position: relative;
+            z-index: 2;
+            animation: fadeInUp 0.8s ease 0.4s backwards;
+        }
+
+        .article-body {
+            font-size: 1.125rem;
+            line-height: 1.8;
+            color: #2d3748;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .article-body p {
+            margin-bottom: 1.5rem;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            padding: 12px 24px;
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 50px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            margin-top: 40px;
+        }
+
+        .back-link:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            transform: translateX(-5px);
+            text-decoration: none;
+        }
+
+        .back-link::before {
+            content: '←';
+            margin-right: 8px;
+            font-size: 18px;
+            transition: transform 0.3s ease;
+        }
+
+        .back-link:hover::before {
+            transform: translateX(-3px);
+        }
+
+        .category-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            color: white;
+            margin-left: 5px;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .article-title {
+                font-size: 2rem;
+            }
+
+            .article-summary {
+                font-size: 1.1rem;
+            }
+
+            .article-content-wrapper {
+                padding: 30px 20px;
+                border-radius: 15px;
+            }
+
+            .article-body {
+                font-size: 1rem;
+            }
+
+            .article-hero {
+                padding: 60px 0 40px;
+            }
+        }
+
+        /* Reading progress bar */
+        .reading-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            z-index: 9999;
+            transition: width 0.1s ease;
+        }
+
+        /* Author info box */
+        .author-info {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 8px 16px;
+            border-radius: 25px;
+            margin-left: 10px;
+        }
+
+        .author-info::before {
+            content: '✍️';
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="reading-progress" id="readingProgress"></div>
+
+{% include "main/partials/_header.html" %}
+
+<section class="article-hero" style="margin-top: 100px">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="article-meta">
+                    {{ article.published_at|date:"d M Y" }}
+                    <span>•</span>
+                    <span class="category-badge">{{ article.category.name }}</span>
+                    {% if article.author %}
+                        <span class="author-info">{{ article.author.username }}</span>
+                    {% endif %}
+                </div>
+
+                <h1 class="article-title">
+                    {{ article.title }}
+                </h1>
+
+                {% if article.summary %}
+                <p class="article-summary">
+                    {{ article.summary }}
+                </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section-gap" style="padding-top: 60px; padding-bottom: 80px;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="article-content-wrapper">
+                    <div class="article-body">
+                        {{ article.body|linebreaks }}
+                    </div>
+
+                    <a href="{% url 'public_article_list' %}" class="back-link">
+                        Back to Blog
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<script src="{% static 'js/vendor/jquery-2.2.4.min.js' %}"></script>
+<script src="{% static 'js/vendor/bootstrap.min.js' %}"></script>
+<script src="{% static 'js/main.js' %}"></script>
+
+<script>
+    // Reading progress bar
+    window.addEventListener('scroll', function() {
+        var winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+        var height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        var scrolled = (winScroll / height) * 100;
+        document.getElementById("readingProgress").style.width = scrolled + "%";
+    });
+</script>
+
+</body>
+</html>

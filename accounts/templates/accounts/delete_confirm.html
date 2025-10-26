@@ -1,0 +1,222 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Account - Art Gallery</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .brush-stroke {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        .brush-stroke:nth-child(1) {
+            top: 10%;
+            left: 10%;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a6f);
+        }
+
+        .brush-stroke:nth-child(2) {
+            bottom: 20%;
+            right: 15%;
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            animation-delay: 2s;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.3) rotate(180deg); }
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            padding: 50px 45px;
+            width: 100%;
+            max-width: 550px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 10;
+            animation: slideIn 0.8s ease-out;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            text-align: center;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .warning-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: shake 2s ease-in-out infinite;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: rotate(0deg); }
+            10%, 30%, 50%, 70%, 90% { transform: rotate(-10deg); }
+            20%, 40%, 60%, 80% { transform: rotate(10deg); }
+        }
+
+        h2 {
+            color: #c92a2a;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            animation: fadeIn 1s ease-out 0.3s both;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .warning-box {
+            background: #fff5f5;
+            border: 2px solid #ff6b6b;
+            border-radius: 20px;
+            padding: 25px;
+            margin: 30px 0;
+            animation: fadeIn 1s ease-out 0.5s both;
+        }
+
+        .warning-box p {
+            color: #c92a2a;
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .warning-box ul {
+            text-align: left;
+            color: #e03131;
+            margin: 15px 0 15px 20px;
+        }
+
+        .warning-box li {
+            margin-bottom: 8px;
+        }
+
+        form {
+            animation: fadeIn 1s ease-out 0.7s both;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            border-radius: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b, #fa5252);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #868e96, #495057);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(73, 80, 87, 0.4);
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 20px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            animation: fadeIn 1s ease-out 0.9s both;
+        }
+
+        .back-link:hover {
+            transform: translateX(-5px);
+        }
+    </style>
+</head>
+<body>
+    <div class="brush-stroke"></div>
+    <div class="brush-stroke"></div>
+
+    <div class="container">
+        <div class="warning-icon">⚠️</div>
+        <h2>Delete Your Account?</h2>
+
+        <div class="warning-box">
+            <p><strong>This action is permanent and cannot be undone!</strong></p>
+            <p>If you delete your account, you will lose:</p>
+            <ul>
+                <li>All your profile information</li>
+                <li>Your artwork and posts</li>
+                <li>Your collections and favorites</li>
+                <li>All comments and interactions</li>
+            </ul>
+            <p>Are you absolutely sure you want to proceed?</p>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="buttons">
+                <a href="{% url 'profile' %}" class="btn btn-secondary">✓ Keep My Account</a>
+                <button type="submit" class="btn btn-danger">🗑️ Yes, Delete Forever</button>
+            </div>
+        </form>
+
+        <a href="{% url 'index' %}" class="back-link">← Back to home</a>
+    </div>
+</body>
+</html>

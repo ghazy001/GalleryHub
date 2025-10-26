@@ -3,58 +3,380 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>{{ workshop.title }}</title>
+    <title>{{ workshop.title }} - Art Museum</title>
 
     <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <style>
+        .workshop-detail-hero {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 60px 0;
+            margin-bottom: 40px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: white;
+            transform: translateX(-5px);
+        }
+
+        .workshop-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .workshop-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.95;
+            margin: 0;
+        }
+
+        .workshop-meta-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-top: -40px;
+            position: relative;
+            z-index: 10;
+            margin-bottom: 30px;
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: start;
+            padding: 15px;
+            background: #fff5f7;
+            border-radius: 12px;
+            border-left: 4px solid #f5576c;
+        }
+
+        .meta-icon {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .meta-content {
+            flex: 1;
+        }
+
+        .meta-content strong {
+            display: block;
+            color: #f5576c;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .meta-content span {
+            color: #333;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        .capacity-highlight {
+            display: inline-block;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+
+        .content-section {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            color: #f5576c;
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title::before {
+            content: "";
+            width: 5px;
+            height: 35px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 3px;
+            margin-right: 15px;
+        }
+
+        .workshop-description {
+            font-size: 16px;
+            line-height: 1.8;
+            color: #555;
+        }
+
+        .materials-grid {
+            display: grid;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .material-item {
+            background: linear-gradient(to right, #fff5f7 0%, #ffffff 100%);
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid #f5576c;
+            transition: all 0.3s ease;
+        }
+
+        .material-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(245,87,108,0.15);
+        }
+
+        .material-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+        }
+
+        .material-name::before {
+            content: "🎨";
+            margin-right: 10px;
+            font-size: 18px;
+        }
+
+        .material-unit {
+            display: inline-block;
+            background: #f5576c;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-left: 10px;
+        }
+
+        .material-description {
+            font-size: 14px;
+            color: #777;
+            margin-top: 8px;
+            line-height: 1.6;
+            padding-left: 28px;
+        }
+
+        .no-materials {
+            text-align: center;
+            padding: 40px;
+            background: linear-gradient(135deg, #fff5f7 0%, #ffffff 100%);
+            border-radius: 12px;
+            border: 2px dashed #f5576c;
+        }
+
+        .no-materials-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .no-materials p {
+            color: #f5576c;
+            font-size: 16px;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        .cta-section {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(245,87,108,0.3);
+        }
+
+        .cta-section h3 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .cta-section p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+            margin-bottom: 25px;
+        }
+
+        .btn-register {
+            display: inline-block;
+            background: white;
+            color: #f5576c;
+            padding: 15px 40px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 14px;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-register:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            color: #f5576c;
+        }
+    </style>
 </head>
 <body>
 
 {% include "main/partials/_header.html" %}
 
-<section class="section-gap" style="padding-top:60px;">
-  <div class="container" style="max-width:900px;">
+<div class="workshop-detail-hero" style="margin-top: 105px;">
+    <div class="container" style="max-width:900px;">
+        <a href="{% url 'public_workshop_list' %}" class="back-link">
+            ← Back to Workshops
+        </a>
+        <h1 class="workshop-title">{{ workshop.title }}</h1>
+        {% if workshop.instructor %}
+        <p class="workshop-subtitle">Led by {{ workshop.instructor }}</p>
+        {% endif %}
+    </div>
+</div>
 
-    <a href="{% url 'public_workshop_list' %}"
-       style="text-decoration:underline; font-size:14px; color:#555;">
-        ← Back to Workshops
-    </a>
+<section class="container" style="max-width:900px; margin-bottom: 80px;">
 
-    <div style="margin-top:20px;">
-        <h1 style="font-weight:600; margin-bottom:10px;">
-            {{ workshop.title }}
-        </h1>
+    <div class="workshop-meta-card">
+        <div class="meta-grid">
+            {% if workshop.instructor %}
+            <div class="meta-item">
+                <div class="meta-icon">👨‍🎨</div>
+                <div class="meta-content">
+                    <strong>Instructor</strong>
+                    <span>{{ workshop.instructor }}</span>
+                </div>
+            </div>
+            {% endif %}
 
-        <p style="color:#888; font-size:14px; margin-bottom:15px;">
-            {% if workshop.instructor %}Instructor: {{ workshop.instructor }} · {% endif %}
-            {{ workshop.place.name }}<br>
-            {{ workshop.start_time }} → {{ workshop.end_time }}<br>
-            Capacity: {{ workshop.capacity }}
-        </p>
+            <div class="meta-item">
+                <div class="meta-icon">📍</div>
+                <div class="meta-content">
+                    <strong>Location</strong>
+                    <span>{{ workshop.place.name }}</span>
+                </div>
+            </div>
 
-        <div style="font-size:16px; line-height:1.6; color:#222; margin-bottom:30px;">
+            <div class="meta-item">
+                <div class="meta-icon">🕐</div>
+                <div class="meta-content">
+                    <strong>Schedule</strong>
+                    <span>
+                        {{ workshop.start_time }}<br>
+                        to {{ workshop.end_time }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="meta-item">
+                <div class="meta-icon">👥</div>
+                <div class="meta-content">
+                    <strong>Capacity</strong>
+                    <span>
+                        <span class="capacity-highlight">{{ workshop.capacity }} seats available</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-section">
+        <h2 class="section-title">About This Workshop</h2>
+        <div class="workshop-description">
             {{ workshop.description|linebreaks }}
         </div>
+    </div>
 
-        <h3 style="font-size:18px; font-weight:600; margin-bottom:10px;">Materials Needed</h3>
+    <div class="content-section">
+        <h2 class="section-title">Materials Needed</h2>
         {% if workshop.materials.all %}
-            <ul style="padding-left:18px;">
+            <div class="materials-grid">
             {% for m in workshop.materials.all %}
-                <li style="margin-bottom:6px;">
-                    <strong>{{ m.name }}</strong>
-                    {% if m.unit %} ({{ m.unit }}){% endif %}
+                <div class="material-item">
+                    <div class="material-name">
+                        {{ m.name }}
+                        {% if m.unit %}
+                        <span class="material-unit">{{ m.unit }}</span>
+                        {% endif %}
+                    </div>
                     {% if m.description %}
-                        <br><span style="font-size:13px; color:#555;">{{ m.description }}</span>
+                    <div class="material-description">{{ m.description }}</div>
                     {% endif %}
-                </li>
+                </div>
             {% endfor %}
-            </ul>
+            </div>
         {% else %}
-            <p style="color:#777;">No special materials required, just show up 🙂</p>
+            <div class="no-materials">
+                <div class="no-materials-icon">✨</div>
+                <p>All materials will be provided - just bring yourself and your creativity!</p>
+            </div>
         {% endif %}
     </div>
 
-  </div>
+    <div class="content-section">
+        <h2 class="section-title">Location & Directions</h2>
+        <div style="margin-top: 20px;">
+            <iframe
+                width="100%"
+                height="400"
+                style="border:0; border-radius: 10px;"
+                loading="lazy"
+                allowfullscreen
+                src="https://www.google.com/maps?q={{ workshop.place.name }},{{ workshop.place.city }}&output=embed">
+            </iframe>
+            <div style="margin-top: 20px; padding: 20px; background: #fff5f7; border-radius: 10px; border-left: 4px solid #f5576c;">
+                <p style="margin: 0; color: #333; font-size: 15px;">
+                    <strong style="color: #f5576c;">📍 {{ workshop.place.name }}</strong><br>
+                    {{ workshop.place.city }}
+                </p>
+            </div>
+        </div>
+    </div>
+
+
+
 </section>
 
 {% include "main/partials/_footer.html" %}

@@ -3,74 +3,331 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Workshops</title>
+    <title>Workshops - Art Museum</title>
 
     <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <style>
+        .workshops-hero {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 80px 0 60px;
+            margin-bottom: 60px;
+            text-align: center;
+        }
+
+        .workshops-hero h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .workshops-hero p {
+            font-size: 1.2rem;
+            opacity: 0.95;
+        }
+
+        .workshop-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.4s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            border: none;
+        }
+
+        .workshop-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(245,87,108,0.3);
+        }
+
+        .workshop-card-header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 25px;
+            color: white;
+        }
+
+        .workshop-card-header h3 {
+            font-size: 1.4rem;
+            margin-bottom: 0;
+            font-weight: 600;
+            line-height: 1.3;
+        }
+
+        .workshop-card-header h3 a {
+            color: white;
+            text-decoration: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .workshop-card-header h3 a:hover {
+            opacity: 0.9;
+        }
+
+        .workshop-card-body {
+            padding: 25px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .workshop-meta {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .meta-row {
+            display: flex;
+            align-items: start;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .meta-icon {
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .meta-content {
+            flex: 1;
+            padding-top: 5px;
+        }
+
+        .meta-label {
+            font-weight: 600;
+            color: #f5576c;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .meta-value {
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .workshop-description {
+            color: #777;
+            font-size: 14px;
+            line-height: 1.7;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 3px solid #f5576c;
+        }
+
+        .materials-section {
+            background: #fff5f7;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .materials-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #f5576c;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .materials-title::before {
+            content: "🎨";
+            margin-right: 8px;
+            font-size: 16px;
+        }
+
+        .materials-list {
+            margin: 0;
+            padding-left: 20px;
+            list-style: none;
+        }
+
+        .materials-list li {
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 6px;
+            position: relative;
+            padding-left: 15px;
+        }
+
+        .materials-list li::before {
+            content: "•";
+            color: #f5576c;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        .no-materials {
+            font-size: 13px;
+            color: #aaa;
+            font-style: italic;
+        }
+
+        .workshop-card-footer {
+            padding: 0 25px 25px;
+            margin-top: auto;
+        }
+
+        .btn-view-workshop {
+            display: inline-block;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 13px;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(245,87,108,0.3);
+            width: 100%;
+            text-align: center;
+        }
+
+        .btn-view-workshop:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 20px rgba(245,87,108,0.4);
+            color: white;
+        }
+
+        .no-workshops {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .no-workshops-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .capacity-badge {
+            display: inline-block;
+            background: #fff;
+            color: #f5576c;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+    </style>
 </head>
 <body>
 
 {% include "main/partials/_header.html" %}
 
-<section class="section-gap" style="padding-top:60px;">
-  <div class="container">
-    <div class="row d-flex justify-content-center">
-      <div class="menu-content pb-60 col-lg-8">
-        <div class="title text-center">
-          <h1 class="mb-10">Upcoming Workshops</h1>
-          <p>Join our hands-on learning sessions.</p>
-        </div>
-      </div>
+<div class="workshops-hero" style="margin-top: 105px;" >
+    <div class="container">
+        <h1>Upcoming Workshops</h1>
+        <p>Join our hands-on learning sessions and unleash your creativity</p>
     </div>
+</div>
 
+<section class="container" style="margin-bottom: 80px;">
     <div class="row">
-      {% for w in workshops %}
-        <div class="col-lg-6" style="margin-bottom:30px;">
-          <div style="border:1px solid #eee; padding:20px; border-radius:4px;">
-            <h3 style="margin-bottom:10px;">
-              <a href="{% url 'public_workshop_detail' w.id %}">
-                {{ w.title }}
-              </a>
-            </h3>
+        {% for w in workshops %}
+        <div class="col-lg-6 mb-4">
+            <div class="workshop-card">
+                <div class="workshop-card-header">
+                    <h3>
+                        <a href="{% url 'public_workshop_detail' w.id %}">{{ w.title }}</a>
+                    </h3>
+                </div>
 
-            <p style="font-size:14px; color:#777;">
-              {% if w.instructor %}Instructor: {{ w.instructor }}<br>{% endif %}
-              Location: {{ w.place.name }}<br>
-              When: {{ w.start_time }} → {{ w.end_time }}<br>
-              Seats: {{ w.capacity }}
-            </p>
+                <div class="workshop-card-body">
+                    <div class="workshop-meta">
+                        {% if w.instructor %}
+                        <div class="meta-row">
+                            <div class="meta-icon">👨‍🎨</div>
+                            <div class="meta-content">
+                                <span class="meta-label">Instructor</span>
+                                <div class="meta-value">{{ w.instructor }}</div>
+                            </div>
+                        </div>
+                        {% endif %}
 
-            <p style="font-size:14px; color:#555; margin-top:10px;">
-              {{ w.description|truncatechars:160 }}
-            </p>
+                        <div class="meta-row">
+                            <div class="meta-icon">📍</div>
+                            <div class="meta-content">
+                                <span class="meta-label">Location</span>
+                                <div class="meta-value">{{ w.place.name }}</div>
+                            </div>
+                        </div>
 
-            <div style="margin-top:10px;">
-              <strong style="font-size:13px;">Materials:</strong>
-              {% if w.materials.all %}
-                <ul style="margin-top:5px; padding-left:18px; font-size:13px; color:#444;">
-                {% for m in w.materials.all %}
-                  <li>{{ m.name }}{% if m.unit %} ({{ m.unit }}){% endif %}</li>
-                {% endfor %}
-                </ul>
-              {% else %}
-                <span style="font-size:13px; color:#aaa;">No special materials.</span>
-              {% endif %}
+                        <div class="meta-row">
+                            <div class="meta-icon">🕐</div>
+                            <div class="meta-content">
+                                <span class="meta-label">Schedule</span>
+                                <div class="meta-value">
+                                    {{ w.start_time }} → {{ w.end_time }}
+                                    <span class="capacity-badge">{{ w.capacity }} seats</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="workshop-description">
+                        {{ w.description|truncatechars:160 }}
+                    </div>
+
+                    <div class="materials-section">
+                        <div class="materials-title">Materials Needed</div>
+                        {% if w.materials.all %}
+                            <ul class="materials-list">
+                            {% for m in w.materials.all %}
+                                <li>{{ m.name }}{% if m.unit %} ({{ m.unit }}){% endif %}</li>
+                            {% endfor %}
+                            </ul>
+                        {% else %}
+                            <div class="no-materials">All materials will be provided</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="workshop-card-footer">
+                    <a href="{% url 'public_workshop_detail' w.id %}" class="btn-view-workshop">
+                        View Details & Register →
+                    </a>
+                </div>
             </div>
-
-            <a href="{% url 'public_workshop_detail' w.id %}"
-               class="primary-btn text-uppercase"
-               style="margin-top:15px; display:inline-block; font-size:12px;">
-               View Details
-            </a>
-          </div>
         </div>
-      {% empty %}
-        <div class="col-12" style="text-align:center; color:#777;">
-          No workshops available.
+        {% empty %}
+        <div class="col-12">
+            <div class="no-workshops">
+                <div class="no-workshops-icon">🎨</div>
+                <h3 style="color: #f5576c; margin-bottom: 10px;">No Workshops Available</h3>
+                <p style="color: #999;">Check back soon for exciting new creative workshops!</p>
+            </div>
         </div>
-      {% endfor %}
+        {% endfor %}
     </div>
-  </div>
 </section>
 
 {% include "main/partials/_footer.html" %}

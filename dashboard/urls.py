@@ -9,6 +9,7 @@ urlpatterns = [
     path('users/', views.user_list_view, name='dashboard_user_list'),
     path('users/<int:user_id>/ban/', views.user_ban_toggle_view, name='dashboard_user_ban_toggle'),
     path('users/<int:user_id>/delete/', views.user_delete_view, name='dashboard_user_delete'),
+    path('users/export/xlsx/', views.user_export_excel_view, name='dashboard_user_export'),
 
     # delegate event + place URLs to the events app
     path('', include('events.dashboard_urls')),

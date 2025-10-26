@@ -218,9 +218,16 @@
             {% for a in articles %}
             <div class="col-lg-3 col-md-6 single-blog">
                 <div class="blog-card">
+
+
                     <div class="thumb">
+                      {% if a.cover_image %}
+                        <img class="img-fluid" src="{{ a.cover_image.url }}" alt="{{ a.title }}">
+                      {% else %}
                         <img class="img-fluid" src="{% static 'img/b1.jpg' %}" alt="{{ a.title }}">
+                      {% endif %}
                     </div>
+
 
                     <div class="blog-content">
 

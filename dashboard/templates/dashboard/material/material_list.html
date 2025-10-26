@@ -14,13 +14,22 @@
     {% include "dashboard/partials/sidebar.html" %}
 
     <main class="main-container">
-        <div class="main-title">
-            <h2>MATERIALS</h2>
-            <a href="{% url 'dashboard_material_create' %}"
-               style="color:#fff;">
-               + Add Material
-            </a>
-        </div>
+                        <div class="main-title" style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;">
+                                <h2 style="margin-right:auto;">MATERIALS</h2>
+
+                                <a href="{% url 'dashboard_material_export' %}"
+                                   style="padding:8px 12px;background:#27ae60;color:#fff;border-radius:4px;
+                                          font-size:13px;text-decoration:none;display:inline-block;">
+                                    ⬇ Export Excel
+                                </a>
+
+                                <a href="{% url 'dashboard_material_create' %}"
+                                   style="padding:8px 12px;background:#3498db;color:#fff;border-radius:4px;
+                                          font-size:13px;text-decoration:none;display:inline-block;">
+                                   + Add Material
+                                </a>
+                         </div>
+
 
         <div class="charts-card" style="overflow-x:auto;">
             <table style="width:100%; border-collapse:collapse; font-size:14px;">

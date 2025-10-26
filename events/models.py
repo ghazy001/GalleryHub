@@ -30,3 +30,12 @@ class Event(models.Model):
 
     def __str__(self):
         return self.title
+
+    class Meta:
+        ordering = ['-start_date']
+        indexes = [
+            models.Index(fields=['start_date']),
+            models.Index(fields=['end_date']),
+            models.Index(fields=['is_published']),
+            models.Index(fields=['place']),
+        ]

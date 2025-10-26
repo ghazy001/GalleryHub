@@ -1,7 +1,18 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from .models import Workshop, Material
 from .forms import WorkshopForm, MaterialForm
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.db.models import Q
+from django.core.paginator import Paginator
+from django.utils.dateparse import parse_date
+import openpyxl
+from openpyxl.utils import get_column_letter
+from openpyxl.styles import Font
+from django.http import HttpResponse
+
+
+from .models import Workshop, Material
+from events.models import Place  # you already import this in models, reuse it
 
 def staff_only(request):
     return request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)
@@ -80,21 +91,95 @@ def material_delete_view(request, material_id):
 
 # ----- WORKSHOP CRUD -----
 
+
+
+
 @login_required
 def workshop_list_view(request):
     if not staff_only(request):
         return redirect('profile')
 
-    workshops = (
+    # --- read filters from GET ---
+    search_q        = request.GET.get('q', '').strip()
+    place_id        = request.GET.get('place', '').strip()
+    active_filter   = request.GET.get('active', '').strip()  # "yes", "no", or ""
+    cap_min_raw     = request.GET.get('cap_min', '').strip()
+    cap_max_raw     = request.GET.get('cap_max', '').strip()
+    date_from_raw   = request.GET.get('date_from', '').strip()  # start_time >= this date
+    date_to_raw     = request.GET.get('date_to', '').strip()    # end_time   <= this date
+
+    # --- base queryset ---
+    qs = (
         Workshop.objects
         .select_related('place')
         .prefetch_related('materials')
-        .order_by('-start_time')
+        .all()
     )
 
+    # --- text search: title / instructor / description ---
+    if search_q:
+        qs = qs.filter(
+            Q(title__icontains=search_q) |
+            Q(instructor__icontains=search_q) |
+            Q(description__icontains=search_q)
+        )
+
+    # --- place filter ---
+    if place_id:
+        qs = qs.filter(place_id=place_id)
+
+    # --- active filter ---
+    # is_active acts like "visible / hidden"
+    if active_filter == "yes":
+        qs = qs.filter(is_active=True)
+    elif active_filter == "no":
+        qs = qs.filter(is_active=False)
+
+    # --- capacity min/max ---
+    # NOTE: we only apply if the value is a valid integer
+    if cap_min_raw.isdigit():
+        qs = qs.filter(capacity__gte=int(cap_min_raw))
+    if cap_max_raw.isdigit():
+        qs = qs.filter(capacity__lte=int(cap_max_raw))
+
+    # --- date range filters (by day portion of start_time / end_time) ---
+    if date_from_raw:
+        dfrom = parse_date(date_from_raw)
+        if dfrom:
+            qs = qs.filter(start_time__date__gte=dfrom)
+
+    if date_to_raw:
+        dto = parse_date(date_to_raw)
+        if dto:
+            qs = qs.filter(end_time__date__lte=dto)
+
+    # --- order newest first (like Events) ---
+    qs = qs.order_by('-start_time')
+
+    # --- dropdown data: places list for the filter select ---
+    places = Place.objects.all().order_by('name')
+
+    # --- pagination ---
+    p = Paginator(qs, 20)  # 20 rows per page
+    page_number = request.GET.get('page')
+    page_obj = p.get_page(page_number)
+
+    # --- render ---
     return render(request, 'dashboard/workshops/workshop_list.html', {
-        'workshops': workshops,
+        'workshops': page_obj,
+        'page_obj': page_obj,
+        'places': places,
+
+        # sticky filters for template
+        'filter_q': search_q,
+        'filter_place': place_id,
+        'filter_active': active_filter,
+        'filter_cap_min': cap_min_raw,
+        'filter_cap_max': cap_max_raw,
+        'filter_date_from': date_from_raw,
+        'filter_date_to': date_to_raw,
     })
+
 
 
 @login_required
@@ -154,3 +239,45 @@ def workshop_delete_view(request, workshop_id):
         'object_name': workshop.title,
         'cancel_url_name': 'dashboard_workshop_list',
     })
+
+
+# -------- EXPORT TO EXCEL --------
+
+@login_required
+def material_export_excel_view(request):
+    if not staff_only(request):
+        return redirect('profile')
+
+    materials = Material.objects.all().order_by('name')
+
+    # Create workbook/sheet
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Materials"
+
+    # Header row
+    headers = ["Name", "Stock Quantity", "Unit", "Description"]
+    for col_idx, header in enumerate(headers, start=1):
+        cell = ws.cell(row=1, column=col_idx, value=header)
+        cell.font = Font(bold=True)
+        ws.column_dimensions[get_column_letter(col_idx)].width = 25
+
+    ws.freeze_panes = "A2"
+
+    # Data rows
+    row_idx = 2
+    for m in materials:
+        ws.cell(row=row_idx, column=1, value=m.name)
+        ws.cell(row=row_idx, column=2, value=m.stock_quantity)
+        ws.cell(row=row_idx, column=3, value=m.unit or "")
+        ws.cell(row=row_idx, column=4, value=m.description or "")
+        row_idx += 1
+
+    # Build response
+    response = HttpResponse(
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response['Content-Disposition'] = 'attachment; filename=materials.xlsx'
+
+    wb.save(response)
+    return response

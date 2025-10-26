@@ -21,12 +21,21 @@
       <!-- Main content -->
       <main class="main-container">
 
-        <div class="main-title">
-          <h2>USER MANAGEMENT</h2>
-          <p style="font-size:14px;color:#666;margin-top:4px;">
-            Logged in as {{ request.user.username }}
-          </p>
-        </div>
+        <div class="main-title" style="display:flex;flex-wrap:wrap;align-items:flex-start;gap:10px;">
+  <div style="margin-right:auto;">
+    <h2 style="margin:0;">USER MANAGEMENT</h2>
+    <p style="font-size:14px;color:#666;margin-top:4px;">
+      Logged in as {{ request.user.username }}
+    </p>
+  </div>
+
+  <a href="{% url 'dashboard_user_export' %}?q={{ search_query }}"
+     style="padding:8px 12px;background:#27ae60;color:#fff;border-radius:4px;
+            font-size:13px;text-decoration:none;display:inline-block;height:fit-content;">
+    ⬇ Export Excel
+  </a>
+</div>
+
 
         <!-- Search form -->
         <form method="get" style="margin-bottom:20px; display:flex; gap:10px; flex-wrap:wrap;">

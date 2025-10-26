@@ -7,6 +7,7 @@ urlpatterns = [
     path('categories/create/', dashboard_views.category_create_view, name='dashboard_category_create'),
     path('categories/<int:category_id>/edit/', dashboard_views.category_edit_view, name='dashboard_category_edit'),
     path('categories/<int:category_id>/delete/', dashboard_views.category_delete_view, name='dashboard_category_delete'),
+    path('categories/export/xlsx/', dashboard_views.category_export_excel_view, name='dashboard_category_export'),
 
     # articles
     path('articles/', dashboard_views.article_list_view, name='dashboard_article_list'),

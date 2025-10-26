@@ -8,6 +8,7 @@ urlpatterns = [
     path('places/create/', dashboard_views.place_create_view, name='dashboard_place_create'),
     path('places/<int:place_id>/edit/', dashboard_views.place_edit_view, name='dashboard_place_edit'),
     path('places/<int:place_id>/delete/', dashboard_views.place_delete_view, name='dashboard_place_delete'),
+    path('places/export/xlsx/', dashboard_views.place_export_excel_view, name='dashboard_place_export'),
 
     # events CRUD
     path('events/', dashboard_views.event_list_view, name='dashboard_event_list'),

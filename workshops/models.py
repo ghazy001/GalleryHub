@@ -42,3 +42,13 @@ class Workshop(models.Model):
 
     def __str__(self):
         return self.title
+
+    class Meta:
+        ordering = ['-start_time']
+        indexes = [
+            models.Index(fields=['start_time']),
+            models.Index(fields=['end_time']),
+            models.Index(fields=['is_active']),
+            models.Index(fields=['place']),
+            models.Index(fields=['capacity']),
+        ]

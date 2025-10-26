@@ -1,7 +1,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
+from django.utils.dateparse import parse_date
+from django.core.paginator import Paginator
+
 from .models import Category, Article
 from .forms import CategoryForm, ArticleForm
+import openpyxl
+from openpyxl.utils import get_column_letter
+from django.http import HttpResponse
+
 
 def staff_only(request):
     return request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)
@@ -86,15 +94,88 @@ def article_list_view(request):
     if not staff_only(request):
         return redirect('profile')
 
-    # show newest first
-    articles = (
+    # --- read filters from querystring ---
+    search_q      = request.GET.get('q', '').strip()
+    category_id   = request.GET.get('category', '').strip()
+    author_id     = request.GET.get('author', '').strip()
+    published     = request.GET.get('published', '').strip()  # "yes", "no", or ""
+    date_from_raw = request.GET.get('date_from', '').strip()
+    date_to_raw   = request.GET.get('date_to', '').strip()
+
+    # --- base queryset ---
+    qs = (
         Article.objects
         .select_related('category', 'author')
-        .order_by('-published_at')
+        .all()
     )
 
+    # --- keyword search (title / summary / body) ---
+    if search_q:
+        qs = qs.filter(
+            Q(title__icontains=search_q) |
+            Q(summary__icontains=search_q) |
+            Q(body__icontains=search_q)
+        )
+
+    # --- category filter ---
+    if category_id:
+        qs = qs.filter(category_id=category_id)
+
+    # --- author filter ---
+    if author_id:
+        qs = qs.filter(author_id=author_id)
+
+    # --- published filter ---
+    if published == "yes":
+        qs = qs.filter(is_published=True)
+    elif published == "no":
+        qs = qs.filter(is_published=False)
+
+    # --- date range on published_at ---
+    if date_from_raw:
+        dfrom = parse_date(date_from_raw)
+        if dfrom:
+            qs = qs.filter(published_at__date__gte=dfrom)
+
+    if date_to_raw:
+        dto = parse_date(date_to_raw)
+        if dto:
+            qs = qs.filter(published_at__date__lte=dto)
+
+    # newest first (also enforced by Meta.ordering)
+    qs = qs.order_by('-published_at')
+
+    # --- dropdown data sources ---
+    categories = Category.objects.all().order_by('name')
+
+    authors = (
+        Article.objects
+        .select_related('author')
+        .values('author_id', 'author__username')
+        .distinct()
+        .order_by('author__username')
+    )
+
+    # --- pagination ---
+    p = Paginator(qs, 20)  # 20 rows per page
+    page_number = request.GET.get('page')
+    page_obj = p.get_page(page_number)
+
+    # --- render ---
     return render(request, 'dashboard/articles/article_list.html', {
-        'articles': articles,
+        'articles': page_obj,     # this is iterable in template
+        'page_obj': page_obj,     # for pagination controls
+
+        'categories': categories,
+        'authors': authors,
+
+        # stick filters in the form
+        'filter_q': search_q,
+        'filter_category': category_id,
+        'filter_author': author_id,
+        'filter_published': published,
+        'filter_date_from': date_from_raw,
+        'filter_date_to': date_to_raw,
     })
 
 
@@ -104,7 +185,7 @@ def article_create_view(request):
         return redirect('profile')
 
     if request.method == "POST":
-        form = ArticleForm(request.POST)
+        form = ArticleForm(request.POST, request.FILES)  # 👈 add request.FILES
         if form.is_valid():
             article = form.save(commit=False)
             if article.author_id is None:  # if not set by form
@@ -129,7 +210,7 @@ def article_edit_view(request, article_id):
     article = get_object_or_404(Article, id=article_id)
 
     if request.method == "POST":
-        form = ArticleForm(request.POST, instance=article)
+        form = ArticleForm(request.POST, request.FILES, instance=article)  #
         if form.is_valid():
             form.save()
             return redirect('dashboard_article_list')
@@ -158,3 +239,43 @@ def article_delete_view(request, article_id):
         'object_name': article.title,
         'cancel_url_name': 'dashboard_article_list',
     })
+
+
+# -------- EXPORT TO EXCEL --------
+@login_required
+def category_export_excel_view(request):
+    if not staff_only(request):
+        return redirect('profile')
+
+    # 1. Query data
+    categories = Category.objects.all().order_by('name')
+
+    # 2. Create workbook + sheet
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Categories"
+
+    # 3. Header row
+    headers = ["Name", "Slug", "Articles"]
+    for col_idx, header in enumerate(headers, start=1):
+        cell = ws.cell(row=1, column=col_idx, value=header)
+        # basic bold/style
+        cell.font = openpyxl.styles.Font(bold=True)
+        ws.column_dimensions[get_column_letter(col_idx)].width = 20
+
+    # 4. Data rows
+    row_idx = 2
+    for c in categories:
+        ws.cell(row=row_idx, column=1, value=c.name)
+        ws.cell(row=row_idx, column=2, value=c.slug)
+        ws.cell(row=row_idx, column=3, value=c.articles.count())
+        row_idx += 1
+
+    # 5. Build HTTP response
+    response = HttpResponse(
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response['Content-Disposition'] = 'attachment; filename=categories.xlsx'
+
+    wb.save(response)
+    return response

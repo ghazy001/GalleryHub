@@ -14,12 +14,21 @@
     {% include "dashboard/partials/sidebar.html" %}
 
     <main class="main-container">
-        <div class="main-title">
-            <h2>FEEDBACK</h2>
-            <p style="font-size:14px;color:#777;margin-top:8px;">
-                Approve or remove visitor comments on artworks.
-            </p>
-        </div>
+       <div class="main-title" style="display:flex;flex-wrap:wrap;align-items:flex-start;gap:10px;">
+    <div style="margin-right:auto;">
+        <h2 style="margin:0;">FEEDBACK</h2>
+        <p style="font-size:14px;color:#777;margin-top:4px;">
+            Approve or remove visitor comments on artworks.
+        </p>
+    </div>
+
+    <a href="{% url 'dashboard_feedback_export' %}"
+       style="padding:8px 12px;background:#27ae60;color:#fff;border-radius:4px;
+              font-size:13px;text-decoration:none;display:inline-block;align-self:flex-start;">
+        ⬇ Export Excel
+    </a>
+</div>
+
 
         <div class="charts-card" style="overflow-x:auto;">
             <table style="width:100%; border-collapse:collapse; font-size:14px;">

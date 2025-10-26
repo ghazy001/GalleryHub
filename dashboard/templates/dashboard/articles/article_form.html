@@ -19,7 +19,7 @@
       </div>
 
       <div class="charts-card">
-        <form method="post" style="display:flex;flex-direction:column;gap:16px;max-width:600px;">
+        <form method="post" enctype="multipart/form-data" style="display:flex;flex-direction:column;gap:16px;max-width:600px;">
           {% csrf_token %}
           {{ form.as_p }}
 

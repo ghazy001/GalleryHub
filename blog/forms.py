@@ -18,6 +18,7 @@ class ArticleForm(forms.ModelForm):
             'body',
             'is_published',
             'published_at',
+            'cover_image',
             # cover_image is not included here yet because handling file upload
             # needs enctype="multipart/form-data". We’ll wire that later if you want images.
         ]

@@ -6,6 +6,76 @@
     <title>Workshops</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'dashboard/css/styles.css' %}">
+    <style>
+      .filter-card {
+        background:#fff;
+        border-radius:8px;
+        box-shadow:0 2px 8px rgba(0,0,0,.05);
+        padding:16px;
+        margin-bottom:20px;
+        font-size:14px;
+      }
+      .filter-row {
+        display:flex;
+        flex-wrap:wrap;
+        gap:12px;
+      }
+      .filter-group {
+        display:flex;
+        flex-direction:column;
+        min-width:140px;
+      }
+      .filter-group label {
+        font-size:12px;
+        font-weight:600;
+        color:#555;
+        margin-bottom:4px;
+        text-transform:uppercase;
+        letter-spacing:.03em;
+      }
+      .filter-group input,
+      .filter-group select {
+        padding:8px 10px;
+        border:1px solid #ccc;
+        border-radius:4px;
+        font-size:13px;
+      }
+      .filter-actions {
+        display:flex;
+        align-items:flex-end;
+        gap:8px;
+      }
+      .btn-primary {
+        background:#3498db;
+        color:#fff;
+        border:none;
+        padding:9px 14px;
+        border-radius:4px;
+        cursor:pointer;
+        font-size:13px;
+        font-weight:600;
+        text-decoration:none;
+        display:inline-block;
+      }
+      .btn-secondary {
+        background:#eee;
+        color:#333;
+        border:none;
+        padding:9px 14px;
+        border-radius:4px;
+        cursor:pointer;
+        font-size:13px;
+        font-weight:600;
+        text-decoration:none;
+        display:inline-block;
+      }
+      @media(max-width:700px){
+        .filter-row { flex-direction:column; }
+        .filter-actions { align-items:stretch; flex-direction:column; }
+        .filter-actions .btn-primary,
+        .filter-actions .btn-secondary { width:100%; text-align:center; }
+      }
+    </style>
 </head>
 <body>
 <div class="grid-container">
@@ -14,14 +84,83 @@
     {% include "dashboard/partials/sidebar.html" %}
 
     <main class="main-container">
-        <div class="main-title">
+        <div class="main-title" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
             <h2>WORKSHOPS</h2>
             <a href="{% url 'dashboard_workshop_create' %}"
-               style="color:#fff;">
+               style="color:#fff; background:#2ecc71;padding:8px 12px;border-radius:4px;font-size:13px;font-weight:600;text-decoration:none;">
                + Add Workshop
             </a>
         </div>
 
+        <!-- FILTER / SEARCH BAR -->
+        <form method="get" class="filter-card">
+          <div class="filter-row">
+
+            <div class="filter-group" style="flex:1 1 180px;">
+              <label for="q">Search</label>
+              <input type="text" id="q" name="q"
+                     placeholder="title / instructor / description..."
+                     value="{{ filter_q }}">
+            </div>
+
+            <div class="filter-group">
+              <label for="place">Place</label>
+              <select id="place" name="place">
+                <option value="">All</option>
+                {% for p in places %}
+                  <option value="{{ p.id }}"
+                          {% if filter_place|default:'' == p.id|stringformat:"s" %}selected{% endif %}>
+                    {{ p.name }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label for="active">Active?</label>
+              <select id="active" name="active">
+                <option value="" {% if not filter_active %}selected{% endif %}>Any</option>
+                <option value="yes" {% if filter_active == "yes" %}selected{% endif %}>YES</option>
+                <option value="no"  {% if filter_active == "no" %}selected{% endif %}>Hidden</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label for="cap_min">Min capacity</label>
+              <input type="number" id="cap_min" name="cap_min" min="0"
+                     value="{{ filter_cap_min }}">
+            </div>
+
+            <div class="filter-group">
+              <label for="cap_max">Max capacity</label>
+              <input type="number" id="cap_max" name="cap_max" min="0"
+                     value="{{ filter_cap_max }}">
+            </div>
+
+            <div class="filter-group">
+              <label for="date_from">Starts After</label>
+              <input type="date" id="date_from" name="date_from" value="{{ filter_date_from }}">
+            </div>
+
+            <div class="filter-group">
+              <label for="date_to">Ends Before</label>
+              <input type="date" id="date_to" name="date_to" value="{{ filter_date_to }}">
+            </div>
+
+            <div class="filter-actions">
+              <button type="submit" class="btn-primary">
+                Apply
+              </button>
+
+              <a href="{% url 'dashboard_workshop_list' %}" class="btn-secondary">
+                Clear
+              </a>
+            </div>
+
+          </div>
+        </form>
+
+        <!-- RESULTS TABLE -->
         <div class="charts-card" style="overflow-x:auto;">
             <table style="width:100%; border-collapse:collapse; font-size:14px;">
                 <thead>
@@ -43,8 +182,18 @@
                         <td style="padding:10px;">{{ w.title }}</td>
                         <td style="padding:10px;">{{ w.instructor|default:"—" }}</td>
                         <td style="padding:10px;">{{ w.place.name }}</td>
-                        <td style="padding:10px;">{{ w.start_time }}</td>
-                        <td style="padding:10px;">{{ w.end_time }}</td>
+                        <td style="padding:10px;">
+                            {{ w.start_time|date:"Y-m-d" }} <br>
+                            <span style="color:#777;font-size:12px;">
+                                {{ w.start_time|date:"H:i" }}
+                            </span>
+                        </td>
+                        <td style="padding:10px;">
+                            {{ w.end_time|date:"Y-m-d" }} <br>
+                            <span style="color:#777;font-size:12px;">
+                                {{ w.end_time|date:"H:i" }}
+                            </span>
+                        </td>
                         <td style="padding:10px;">{{ w.capacity }}</td>
                         <td style="padding:10px;">
                             {% if w.is_active %}
@@ -65,7 +214,7 @@
 
                         <td style="padding:10px;white-space:nowrap;">
                             <a href="{% url 'dashboard_workshop_edit' w.id %}"
-                               style="padding:6px 10px;background:#3498db;color:#fff;border-radius:4px;font-size:12px;">Edit</a>
+                               style="padding:6px 10px;background:#3498db;color:#fff;border-radius:4px;font-size:12px;text-decoration:none;">Edit</a>
 
                             <form method="post"
                                   action="{% url 'dashboard_workshop_delete' w.id %}"
@@ -82,13 +231,43 @@
                 {% empty %}
                     <tr>
                         <td colspan="9" style="padding:20px;color:#666;text-align:center;">
-                            No workshops yet.
+                            No workshops found.
                         </td>
                     </tr>
                 {% endfor %}
                 </tbody>
             </table>
         </div>
+
+        <!-- PAGINATION -->
+        {% if page_obj.paginator.num_pages > 1 %}
+          <p style="margin:10px 0 0; font-size:13px; color:#666; text-align:center;">
+            Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }} workshops
+          </p>
+
+          <div style="padding:16px; font-size:13px; display:flex; gap:8px; flex-wrap:wrap; justify-content:center;">
+
+            {% if page_obj.has_previous %}
+              <a class="btn-secondary"
+                 href="?page={{ page_obj.previous_page_number }}&q={{ filter_q }}&place={{ filter_place }}&active={{ filter_active }}&cap_min={{ filter_cap_min }}&cap_max={{ filter_cap_max }}&date_from={{ filter_date_from }}&date_to={{ filter_date_to }}">
+                ‹ Prev
+              </a>
+            {% endif %}
+
+            <span style="padding:9px 14px;border:1px solid #ddd;border-radius:4px;">
+              Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+
+            {% if page_obj.has_next %}
+              <a class="btn-secondary"
+                 href="?page={{ page_obj.next_page_number }}&q={{ filter_q }}&place={{ filter_place }}&active={{ filter_active }}&cap_min={{ filter_cap_min }}&cap_max={{ filter_cap_max }}&date_from={{ filter_date_from }}&date_to={{ filter_date_to }}">
+                Next ›
+              </a>
+            {% endif %}
+
+          </div>
+        {% endif %}
+
     </main>
 
 </div>

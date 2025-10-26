@@ -35,3 +35,12 @@ class Article(models.Model):
 
     def __str__(self):
         return self.title
+
+    class Meta:
+        ordering = ['-published_at']
+        indexes = [
+            models.Index(fields=['published_at']),
+            models.Index(fields=['is_published']),
+            models.Index(fields=['category']),
+            models.Index(fields=['author']),
+        ]

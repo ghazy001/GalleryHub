@@ -4,6 +4,12 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from .models import Place, Event
 from .forms import PlaceForm, EventForm
+from django.utils.dateparse import parse_date
+from django.core.paginator import Paginator
+import openpyxl
+from openpyxl.utils import get_column_letter
+from django.http import HttpResponse
+from openpyxl.styles import Font
 
 def staff_only(request):
     return request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)
@@ -89,9 +95,75 @@ def event_list_view(request):
     if not staff_only(request):
         return redirect('profile')
 
-    events = Event.objects.all().select_related('place').order_by('-start_date')
+    # --- read filters from querystring ---
+    search_q      = request.GET.get('q', '').strip()
+    place_id      = request.GET.get('place', '').strip()
+    published     = request.GET.get('published', '').strip()  # "yes", "no", or ""
+    date_from_raw = request.GET.get('date_from', '').strip()  # filter start_date >= this date
+    date_to_raw   = request.GET.get('date_to', '').strip()    # filter end_date   <= this date
+
+    # --- base queryset ---
+    qs = (
+        Event.objects
+        .select_related('place')
+        .all()
+    )
+
+    # --- text search ---
+    if search_q:
+        qs = qs.filter(
+            Q(title__icontains=search_q) |
+            Q(description__icontains=search_q)
+        )
+
+    # --- place filter ---
+    if place_id:
+        qs = qs.filter(place_id=place_id)
+
+    # --- published filter ---
+    if published == "yes":
+        qs = qs.filter(is_published=True)
+    elif published == "no":
+        qs = qs.filter(is_published=False)
+
+    # --- date range filters ---
+    # We treat date_from as "events starting on/after this day"
+    # and date_to as "events ending on/before this day"
+    if date_from_raw:
+        dfrom = parse_date(date_from_raw)  # returns datetime.date
+        if dfrom:
+            qs = qs.filter(start_date__date__gte=dfrom)
+
+    if date_to_raw:
+        dto = parse_date(date_to_raw)
+        if dto:
+            qs = qs.filter(end_date__date__lte=dto)
+
+    # --- sort upcoming first (soonest first) OR newest first?
+    # For dashboard, it's often nicer to see most recent / upcoming first.
+    # We'll sort by -start_date like you had.
+    qs = qs.order_by('-start_date')
+
+    # --- dropdown data sources ---
+    places = Place.objects.all().order_by('name')
+
+    # --- pagination ---
+    p = Paginator(qs, 20)  # 20 rows per page
+    page_number = request.GET.get('page')
+    page_obj = p.get_page(page_number)
+
+    # --- render ---
     return render(request, 'dashboard/events/event_list.html', {
-        'events': events,
+        'events': page_obj,
+        'page_obj': page_obj,
+        'places': places,
+
+        # pass current filters to keep form sticky + persist in pagination links
+        'filter_q': search_q,
+        'filter_place': place_id,
+        'filter_published': published,
+        'filter_date_from': date_from_raw,
+        'filter_date_to': date_to_raw,
     })
 
 
@@ -152,3 +224,48 @@ def event_delete_view(request, event_id):
         'object_name': event.title,
         'cancel_url_name': 'dashboard_event_list',
     })
+
+
+# -------- EXPORT TO EXCEL --------
+
+@login_required
+def place_export_excel_view(request):
+    if not staff_only(request):
+        return redirect('profile')
+
+    places = Place.objects.all().order_by('name')
+
+    # workbook + sheet
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Places"
+
+    # header row
+    headers = ["Name", "Address", "City", "Capacity", "Events count"]
+    for col_idx, header in enumerate(headers, start=1):
+        cell = ws.cell(row=1, column=col_idx, value=header)
+        cell.font = Font(bold=True)
+        ws.column_dimensions[get_column_letter(col_idx)].width = 20
+
+    # freeze header row for convenience
+    ws.freeze_panes = "A2"
+
+    # data rows
+    row_idx = 2
+    for p in places:
+        ws.cell(row=row_idx, column=1, value=p.name)
+        ws.cell(row=row_idx, column=2, value=p.address)
+        ws.cell(row=row_idx, column=3, value=p.city)
+        ws.cell(row=row_idx, column=4, value=p.capacity)
+        # if you have related_name='events' on Event.place, this will work:
+        ws.cell(row=row_idx, column=5, value=p.event_set.count() if hasattr(p, "event_set") else None)
+        row_idx += 1
+
+    # build response
+    response = HttpResponse(
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response['Content-Disposition'] = 'attachment; filename=places.xlsx'
+
+    wb.save(response)
+    return response

@@ -6,6 +6,76 @@
     <title>Events</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'dashboard/css/styles.css' %}">
+    <style>
+      .filter-card {
+        background:#fff;
+        border-radius:8px;
+        box-shadow:0 2px 8px rgba(0,0,0,.05);
+        padding:16px;
+        margin-bottom:20px;
+        font-size:14px;
+      }
+      .filter-row {
+        display:flex;
+        flex-wrap:wrap;
+        gap:12px;
+      }
+      .filter-group {
+        display:flex;
+        flex-direction:column;
+        min-width:140px;
+      }
+      .filter-group label {
+        font-size:12px;
+        font-weight:600;
+        color:#555;
+        margin-bottom:4px;
+        text-transform:uppercase;
+        letter-spacing:.03em;
+      }
+      .filter-group input,
+      .filter-group select {
+        padding:8px 10px;
+        border:1px solid #ccc;
+        border-radius:4px;
+        font-size:13px;
+      }
+      .filter-actions {
+        display:flex;
+        align-items:flex-end;
+        gap:8px;
+      }
+      .btn-primary {
+        background:#3498db;
+        color:#fff;
+        border:none;
+        padding:9px 14px;
+        border-radius:4px;
+        cursor:pointer;
+        font-size:13px;
+        font-weight:600;
+        text-decoration:none;
+        display:inline-block;
+      }
+      .btn-secondary {
+        background:#eee;
+        color:#333;
+        border:none;
+        padding:9px 14px;
+        border-radius:4px;
+        cursor:pointer;
+        font-size:13px;
+        font-weight:600;
+        text-decoration:none;
+        display:inline-block;
+      }
+      @media(max-width:700px){
+        .filter-row { flex-direction:column; }
+        .filter-actions { align-items:stretch; flex-direction:column; }
+        .filter-actions .btn-primary,
+        .filter-actions .btn-secondary { width:100%; text-align:center; }
+      }
+    </style>
 </head>
 <body>
 <div class="grid-container">
@@ -14,14 +84,72 @@
   {% include "dashboard/partials/sidebar.html" %}
 
   <main class="main-container">
-      <div class="main-title">
+      <div class="main-title" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
           <h2>EVENTS</h2>
+
           <a href="{% url 'dashboard_event_create' %}"
-             style="color:#fff">
+             style="color:#fff; background:#2ecc71;padding:8px 12px;border-radius:4px;font-size:13px;font-weight:600;text-decoration:none;">
              + Add Event
           </a>
       </div>
 
+      <!-- FILTER / SEARCH BAR -->
+      <form method="get" class="filter-card">
+        <div class="filter-row">
+
+          <div class="filter-group" style="flex:1 1 180px;">
+            <label for="q">Search</label>
+            <input type="text" id="q" name="q"
+                   placeholder="title / description..."
+                   value="{{ filter_q }}">
+          </div>
+
+          <div class="filter-group">
+            <label for="place">Place</label>
+            <select id="place" name="place">
+              <option value="">All</option>
+              {% for p in places %}
+                <option value="{{ p.id }}"
+                        {% if filter_place|default:'' == p.id|stringformat:"s" %}selected{% endif %}>
+                  {{ p.name }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="published">Published?</label>
+            <select id="published" name="published">
+              <option value="" {% if not filter_published %}selected{% endif %}>Any</option>
+              <option value="yes" {% if filter_published == "yes" %}selected{% endif %}>YES</option>
+              <option value="no"  {% if filter_published == "no" %}selected{% endif %}>No</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="date_from">Starts After</label>
+            <input type="date" id="date_from" name="date_from" value="{{ filter_date_from }}">
+          </div>
+
+          <div class="filter-group">
+            <label for="date_to">Ends Before</label>
+            <input type="date" id="date_to" name="date_to" value="{{ filter_date_to }}">
+          </div>
+
+          <div class="filter-actions">
+            <button type="submit" class="btn-primary">
+              Apply
+            </button>
+
+            <a href="{% url 'dashboard_event_list' %}" class="btn-secondary">
+              Clear
+            </a>
+          </div>
+
+        </div>
+      </form>
+
+      <!-- RESULTS TABLE -->
       <div class="charts-card" style="overflow-x:auto;">
         <table style="width:100%; border-collapse:collapse; font-size:14px;">
           <thead>
@@ -39,19 +167,29 @@
             <tr style="border-bottom:1px solid #eee;">
               <td style="padding:10px;">{{ e.title }}</td>
               <td style="padding:10px;">{{ e.place.name }}</td>
-              <td style="padding:10px;">{{ e.start_date }}</td>
-              <td style="padding:10px;">{{ e.end_date }}</td>
+              <td style="padding:10px;">
+                {{ e.start_date|date:"Y-m-d" }} <br>
+                <span style="color:#777;font-size:12px;">
+                    {{ e.start_date|date:"H:i" }}
+                </span>
+              </td>
+              <td style="padding:10px;">
+                {{ e.end_date|date:"Y-m-d" }} <br>
+                <span style="color:#777;font-size:12px;">
+                    {{ e.end_date|date:"H:i" }}
+                </span>
+              </td>
               <td style="padding:10px;">
                 {% if e.is_published %}
                   <span style="color:green;font-weight:600;">YES</span>
                 {% else %}
-                  <span style="color:#999;">no</span>
+                  <span style="color:#999;">No</span>
                 {% endif %}
               </td>
               <td style="padding:10px;white-space:nowrap;">
 
                 <a href="{% url 'dashboard_event_edit' e.id %}"
-                   style="padding:6px 10px;background:#3498db;color:#fff;border-radius:4px;font-size:12px;">Edit</a>
+                   style="padding:6px 10px;background:#3498db;color:#fff;border-radius:4px;font-size:12px;text-decoration:none;">Edit</a>
 
                 <form method="post" action="{% url 'dashboard_event_delete' e.id %}" style="display:inline;">
                   {% csrf_token %}
@@ -65,11 +203,44 @@
               </td>
             </tr>
           {% empty %}
-            <tr><td colspan="6" style="padding:20px;color:#666;text-align:center;">No events yet.</td></tr>
+            <tr>
+              <td colspan="6" style="padding:20px;color:#666;text-align:center;">
+                No events found.
+              </td>
+            </tr>
           {% endfor %}
           </tbody>
         </table>
       </div>
+
+      <!-- PAGINATION -->
+      {% if page_obj.paginator.num_pages > 1 %}
+        <p style="margin:10px 0 0; font-size:13px; color:#666; text-align:center;">
+          Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }} events
+        </p>
+
+        <div style="padding:16px; font-size:13px; display:flex; gap:8px; flex-wrap:wrap; justify-content:center;">
+
+          {% if page_obj.has_previous %}
+            <a class="btn-secondary"
+               href="?page={{ page_obj.previous_page_number }}&q={{ filter_q }}&place={{ filter_place }}&published={{ filter_published }}&date_from={{ filter_date_from }}&date_to={{ filter_date_to }}">
+              ‹ Prev
+            </a>
+          {% endif %}
+
+          <span style="padding:9px 14px;border:1px solid #ddd;border-radius:4px;">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+          </span>
+
+          {% if page_obj.has_next %}
+            <a class="btn-secondary"
+               href="?page={{ page_obj.next_page_number }}&q={{ filter_q }}&place={{ filter_place }}&published={{ filter_published }}&date_from={{ filter_date_from }}&date_to={{ filter_date_to }}">
+              Next ›
+            </a>
+          {% endif %}
+        </div>
+      {% endif %}
+
   </main>
 </div>
 <script src="{% static 'dashboard/js/scripts.js' %}"></script>

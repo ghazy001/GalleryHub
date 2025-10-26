@@ -16,6 +16,21 @@ class Artwork(models.Model):
     def __str__(self):
         return self.title
 
+    def thumbnail_url(self):
+        # convenience for templates:
+        if self.image:
+            return self.image.url
+        return None  # template will fallback to static placeholder
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['created_at']),
+            models.Index(fields=['is_visible']),
+            models.Index(fields=['artist']),
+            models.Index(fields=['year']),
+        ]
+
 
 class ArtworkFeedback(models.Model):
     artwork = models.ForeignKey(Artwork, on_delete=models.CASCADE, related_name='feedbacks')

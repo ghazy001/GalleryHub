@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     "accounts",
     "dashboard",
     "events",
-    "blog"
+    "blog",
+    "gallery"
 
 ]
 

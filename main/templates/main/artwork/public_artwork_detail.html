@@ -1,0 +1,577 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>{{ artwork.title }}</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <style>
+        /* Page Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Back Button */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: #667eea;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: #f7fafc;
+            transition: all 0.3s ease;
+            animation: slideInLeft 0.6s ease-out;
+        }
+
+        .back-btn:hover {
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            transform: translateX(-5px);
+        }
+
+        .back-btn::before {
+            content: '←';
+            font-size: 18px;
+        }
+
+        /* Artwork Header */
+        .artwork-header {
+            margin-top: 30px;
+            margin-bottom: 40px;
+            animation: slideInUp 0.6s ease-out 0.2s backwards;
+        }
+
+        .artwork-title {
+            font-weight: 700;
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: #2d3748;
+            line-height: 1.2;
+        }
+
+        .artwork-meta {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        .meta-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* Image Container */
+        .artwork-image-container {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            margin-bottom: 40px;
+            animation: slideInUp 0.6s ease-out 0.4s backwards;
+        }
+
+        .artwork-image-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.1) 100%);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .artwork-image-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.6s ease;
+        }
+
+        .artwork-image-container:hover img {
+            transform: scale(1.02);
+        }
+
+        /* Description */
+        .artwork-description {
+            font-size: 17px;
+            line-height: 1.8;
+            color: #4a5568;
+            margin-bottom: 60px;
+            padding: 30px;
+            background: #f7fafc;
+            border-left: 4px solid #667eea;
+            border-radius: 8px;
+            animation: slideInUp 0.6s ease-out 0.6s backwards;
+        }
+
+        /* Section Headers */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #e2e8f0;
+        }
+
+        .section-header h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin: 0;
+        }
+
+        .section-icon {
+            font-size: 1.8rem;
+        }
+
+        /* Feedback Section */
+        .feedback-section {
+            margin-top: 60px;
+            animation: fadeIn 0.6s ease-out 0.8s backwards;
+        }
+
+        .feedback-card {
+            background: white;
+            border: none;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feedback-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, #667eea, #764ba2);
+        }
+
+        .feedback-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
+
+        .feedback-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .feedback-author {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .author-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .author-name {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 15px;
+        }
+
+        .rating-stars {
+            display: flex;
+            gap: 3px;
+        }
+
+        .star {
+            color: #fbbf24;
+            font-size: 18px;
+        }
+
+        .star.empty {
+            color: #e2e8f0;
+        }
+
+        .feedback-comment {
+            font-size: 15px;
+            color: #4a5568;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .feedback-date {
+            font-size: 12px;
+            color: #a0aec0;
+            font-weight: 500;
+        }
+
+        .no-feedback {
+            text-align: center;
+            padding: 60px 20px;
+            background: #f7fafc;
+            border-radius: 12px;
+            color: #718096;
+        }
+
+        .no-feedback-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        /* Form Section */
+        .form-section {
+            margin-top: 60px;
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            animation: slideInUp 0.6s ease-out 1s backwards;
+        }
+
+        .message-box {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            animation: slideInUp 0.3s ease-out;
+        }
+
+        .message-success {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .message-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .user-info-box {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #4a5568;
+            border-left: 4px solid #667eea;
+        }
+
+        .user-info-box strong {
+            color: #2d3748;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 14px 32px;
+            border: none;
+            border-radius: 25px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .form-note {
+            font-size: 13px;
+            color: #718096;
+            margin-top: 15px;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .form-note::before {
+            content: 'ℹ️';
+            font-size: 16px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .artwork-title {
+                font-size: 1.8rem;
+            }
+
+            .form-section {
+                padding: 25px;
+            }
+
+            .section-header h3 {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+
+{% include "main/partials/_header.html" %}
+
+<section class="section-gap" style="padding-top:130px; padding-bottom:80px;">
+    <div class="container" style="max-width:900px;">
+
+        <a href="{% url 'public_artwork_list' %}" class="back-btn">
+            Back to Gallery
+        </a>
+
+        <div class="artwork-header">
+            <h1 class="artwork-title">{{ artwork.title }}</h1>
+
+            <div class="artwork-meta">
+                {% if artwork.artist %}
+                    <span class="meta-badge">👨‍🎨 {{ artwork.artist }}</span>
+                {% endif %}
+                {% if artwork.year %}
+                    <span class="meta-badge">📅 {{ artwork.year }}</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="artwork-image-container">
+            {% if artwork.image %}
+                <img src="{{ artwork.image.url }}" alt="{{ artwork.title }}" class="img-fluid">
+            {% else %}
+                <img src="{% static 'images/placeholder.jpg' %}" alt="No image" class="img-fluid">
+            {% endif %}
+        </div>
+
+        <div class="artwork-description">
+            {{ artwork.description|linebreaks }}
+        </div>
+
+        {# FEEDBACK LIST #}
+        <div class="feedback-section">
+            <div class="section-header">
+                <span class="section-icon">💬</span>
+                <h3>Visitor Feedback</h3>
+            </div>
+
+            {% if approved_feedback %}
+                {% for fb in approved_feedback %}
+                    <div class="feedback-card">
+                        <div class="feedback-header">
+                            <div class="feedback-author">
+                                <div class="author-avatar">
+                                    {% if fb.user %}
+                                        {{ fb.user.username|slice:":1"|upper }}
+                                    {% elif fb.name %}
+                                        {{ fb.name|slice:":1"|upper }}
+                                    {% else %}
+                                        ?
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <div class="author-name">
+                                        {% if fb.user %}
+                                            {{ fb.user.username }}
+                                        {% elif fb.name %}
+                                            {{ fb.name }}
+                                        {% else %}
+                                            Anonymous
+                                        {% endif %}
+                                    </div>
+                                    <div class="feedback-date">{{ fb.add|date:"d M Y, H:i" }}</div>
+                                </div>
+                            </div>
+                            <div class="rating-stars">
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= fb.rating %}
+                                        <span class="star">★</span>
+                                    {% else %}
+                                        <span class="star empty">★</span>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="feedback-comment">
+                            {{ fb.comment|linebreaks }}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="no-feedback">
+                    <div class="no-feedback-icon">💭</div>
+                    <p style="font-size:16px; font-weight:600; margin-bottom:5px;">No feedback yet</p>
+                    <p style="margin:0;">Be the first to share your thoughts about this artwork!</p>
+                </div>
+            {% endif %}
+        </div>
+
+        {# SUBMIT FEEDBACK FORM #}
+        <div class="form-section">
+            <div class="section-header">
+                <span class="section-icon">✍️</span>
+                <h3>Leave Your Feedback</h3>
+            </div>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="message-box {% if message.tags == 'error' %}message-error{% else %}message-success{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+
+                {% if not request.user.is_authenticated %}
+                    <div class="form-group">
+                        <label class="form-label">Your Name (Optional)</label>
+                        <input type="text"
+                               name="name"
+                               value="{{ initial_name }}"
+                               class="form-input"
+                               placeholder="Enter your name">
+                    </div>
+                {% else %}
+                    <div class="user-info-box">
+                        Posting as <strong>{{ request.user.username }}</strong>
+                    </div>
+                {% endif %}
+
+                <div class="form-group" style="margin-top:25px;">
+                    <label class="form-label">Rating</label>
+                    <select name="rating" class="form-select">
+                        <option value="5">⭐⭐⭐⭐⭐ Amazing</option>
+                        <option value="4">⭐⭐⭐⭐ Good</option>
+                        <option value="3">⭐⭐⭐ Okay</option>
+                        <option value="2">⭐⭐ Meh</option>
+                        <option value="1">⭐ Poor</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Comment</label>
+                    <textarea name="comment"
+                              class="form-textarea"
+                              placeholder="Tell us what you think about this artwork..."
+                              required></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    Submit Feedback
+                </button>
+
+                <p class="form-note">
+                    Your feedback will appear publicly after review by our team.
+                </p>
+            </form>
+        </div>
+
+    </div>
+</section>
+
+{% include "main/partials/_footer.html" %}
+
+<script src="{% static 'js/vendor/jquery-2.2.4.min.js' %}"></script>
+<script src="{% static 'js/vendor/bootstrap.min.js' %}"></script>
+<script src="{% static 'js/main.js' %}"></script>
+</body>
+</html>

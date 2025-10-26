@@ -1,0 +1,373 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Gallery</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <style>
+        /* Gallery Enhancements */
+        .gallery-hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 80px 0 60px;
+            margin-top: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gallery-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><rect width="2" height="2" fill="white" opacity="0.1"/></svg>');
+            animation: backgroundScroll 20s linear infinite;
+        }
+
+        @keyframes backgroundScroll {
+            0% { transform: translateX(0) translateY(0); }
+            100% { transform: translateX(100px) translateY(100px); }
+        }
+
+        .gallery-hero .title {
+            position: relative;
+            z-index: 1;
+        }
+
+        .gallery-hero h1 {
+            color: white;
+            font-weight: 700;
+            font-size: 3rem;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .gallery-hero p {
+            color: rgba(255,255,255,0.95);
+            font-size: 1.2rem;
+            animation: fadeInUp 0.8s ease-out 0.2s backwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Card Styling */
+        .artwork-card {
+            margin-bottom: 30px;
+            animation: fadeInScale 0.6s ease-out backwards;
+        }
+
+        .artwork-card:nth-child(1) { animation-delay: 0.1s; }
+        .artwork-card:nth-child(2) { animation-delay: 0.2s; }
+        .artwork-card:nth-child(3) { animation-delay: 0.3s; }
+        .artwork-card:nth-child(4) { animation-delay: 0.4s; }
+        .artwork-card:nth-child(5) { animation-delay: 0.5s; }
+        .artwork-card:nth-child(6) { animation-delay: 0.6s; }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .card-inner {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: white;
+            height: 100%;
+        }
+
+        .card-inner:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+        }
+
+        /* Image Container */
+        .image-wrapper {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
+        .image-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+
+        .card-inner:hover .image-wrapper img {
+            transform: scale(1.1) rotate(2deg);
+        }
+
+        .image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.7) 100%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .card-inner:hover .image-overlay {
+            opacity: 1;
+        }
+
+        .quick-view {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            opacity: 0;
+            transition: all 0.4s ease;
+            background: white;
+            color: #667eea;
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 14px;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .card-inner:hover .quick-view {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Content Styling */
+        .card-content {
+            padding: 25px;
+        }
+
+        .card-content h4 {
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .card-content h4 a {
+            color: #2d3748;
+            text-decoration: none;
+            transition: color 0.3s ease;
+            display: inline-block;
+            position: relative;
+        }
+
+        .card-content h4 a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(to right, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+
+        .card-content h4 a:hover::after {
+            width: 100%;
+        }
+
+        .card-content h4 a:hover {
+            color: #667eea;
+        }
+
+        .artwork-meta {
+            font-size: 14px;
+            color: #718096;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: inline-flex;
+            align-items: center;
+            background: #f7fafc;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-weight: 500;
+        }
+
+        .artwork-description {
+            font-size: 14px;
+            color: #4a5568;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .view-details-btn {
+            display: inline-block;
+            padding: 10px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .view-details-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            color: #cbd5e0;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            color: #4a5568;
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            color: #718096;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Loading Animation */
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .gallery-hero h1 {
+                font-size: 2rem;
+            }
+            .gallery-hero p {
+                font-size: 1rem;
+            }
+            .image-wrapper {
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+{% include "main/partials/_header.html" %}
+
+<div class="gallery-hero">
+    <div class="container">
+        <div class="row d-flex justify-content-center">
+            <div class="col-lg-8">
+                <div class="title text-center">
+                    <h1>Our Exhibition Gallery</h1>
+                    <p>Explore artworks currently showcased in our collection</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="section-gap" style="padding: 60px 0;">
+    <div class="container">
+        <div class="row">
+            {% for art in artworks %}
+                <div class="col-lg-4 col-md-6 artwork-card">
+                    <div class="card-inner">
+                        <div class="image-wrapper">
+                            {% if art.image %}
+                                <img src="{{ art.image.url }}" alt="{{ art.title }}">
+                            {% else %}
+                                <img src="{% static 'images/placeholder.jpg' %}" alt="No image">
+                            {% endif %}
+                            <div class="image-overlay"></div>
+                            <a href="{% url 'public_artwork_detail' art.id %}" class="quick-view">
+                                Quick View
+                            </a>
+                        </div>
+
+                        <div class="card-content">
+                            <h4>
+                                <a href="{% url 'public_artwork_detail' art.id %}">{{ art.title }}</a>
+                            </h4>
+
+                            <div class="artwork-meta">
+                                {% if art.artist %}
+                                    <span class="meta-item">👨‍🎨 {{ art.artist }}</span>
+                                {% endif %}
+                                {% if art.year %}
+                                    <span class="meta-item">📅 {{ art.year }}</span>
+                                {% endif %}
+                            </div>
+
+                            <p class="artwork-description">
+                                {{ art.description|truncatechars:120 }}
+                            </p>
+
+                            <a href="{% url 'public_artwork_detail' art.id %}" class="view-details-btn">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🎨</div>
+                        <h3>No Artworks Available</h3>
+                        <p>Our gallery is currently being updated. Please check back soon!</p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+{% include "main/partials/_footer.html" %}
+
+<script src="{% static 'js/vendor/jquery-2.2.4.min.js' %}"></script>
+<script src="{% static 'js/vendor/bootstrap.min.js' %}"></script>
+<script src="{% static 'js/main.js' %}"></script>
+</body>
+</html>

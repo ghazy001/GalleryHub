@@ -45,18 +45,12 @@
                 <ul class="nav-menu">
                     <li class="menu-active"><a href="/">Home</a></li>
                     <li><a href="#">About</a></li>
-                    <li><a href="#gallery">Gallery</a></li>
+                    <li><a href="{% url 'public_artwork_list' %}">Gallery</a></li>
                     <li><a href="{% url 'public_events_list' %}">Events</a></li>
                     <li><a href="{% url 'public_article_list' %}">Blog</a></li>
                     <li><a href="#contact">Contact</a></li>
 
-                    <li class="menu-has-children"><a href="">Pages</a>
-                        <ul>
-                            <li><a href="#">Blog Single</a></li>
-                            <li><a href="#">Category</a></li>
-                            <li><a href="#">Elements</a></li>
-                        </ul>
-                    </li>
+
 
                     {% if request.user.is_authenticated %}
                         {% if request.user.is_staff or request.user.is_superuser %}

@@ -17,5 +17,8 @@ urlpatterns = [
     # blog (articles / categories)
     path('', include('blog.dashboard_urls')),
 
+    # gallery (artworks / feedback)
+    path('', include('gallery.dashboard_urls')),
+
 
 ]

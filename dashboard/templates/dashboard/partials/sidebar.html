@@ -44,11 +44,31 @@
       </a>
     </li>
 
+      <li class="sidebar-list-item">
+       <a href="{% url 'dashboard_artwork_list' %}">
+       <span class="material-icons-outlined">photo</span> Artworks
+       </a>
+     </li>
+
+      <li class="sidebar-list-item">
+      <a href="{% url 'dashboard_feedback_list' %}">
+      <span class="material-icons-outlined">rate_review</span> Feedback
+      </a>
+    </li>
+
     <li class="sidebar-list-item">
       <a href="{% url 'logout' %}">
         <span class="material-icons-outlined">logout</span> Logout
       </a>
     </li>
+
+      <li class="sidebar-list-item">
+      <a href="{% url 'index' %}">
+        <span class="material-icons-outlined">home</span> Home page
+      </a>
+    </li>
+
+
 
   </ul>
 </aside>

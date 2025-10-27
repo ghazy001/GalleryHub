@@ -7,82 +7,104 @@
   </div>
 
   <ul class="sidebar-list">
-
+    <!-- DASHBOARD -->
+    <li class="sidebar-section-title">Main</li>
     <li class="sidebar-list-item">
       <a href="{% url 'dashboard' %}">
         <span class="material-icons-outlined">dashboard</span> Dashboard
       </a>
     </li>
 
+    <!-- MANAGEMENT -->
+    <li class="sidebar-section-title">Management</li>
     <li class="sidebar-list-item">
       <a href="{% url 'dashboard_user_list' %}">
         <span class="material-icons-outlined">groups</span> Users
       </a>
     </li>
-
     <li class="sidebar-list-item">
       <a href="{% url 'dashboard_place_list' %}">
         <span class="material-icons-outlined">location_on</span> Places
       </a>
     </li>
+    <li class="sidebar-list-item">
+      <a href="{% url 'dashboard_feedback_list' %}">
+        <span class="material-icons-outlined">rate_review</span> Feedback
+      </a>
+    </li>
 
+    <!-- CONTENT -->
+    <li class="sidebar-section-title">Content</li>
     <li class="sidebar-list-item">
       <a href="{% url 'dashboard_event_list' %}">
         <span class="material-icons-outlined">event</span> Events
       </a>
     </li>
-
     <li class="sidebar-list-item">
-      <a href="{% url 'dashboard_category_list' %}">
-        <span class="material-icons-outlined">category</span> Categories
+      <a href="{% url 'dashboard_workshop_list' %}">
+        <span class="material-icons-outlined">school</span> Workshops
       </a>
     </li>
-
     <li class="sidebar-list-item">
       <a href="{% url 'dashboard_article_list' %}">
         <span class="material-icons-outlined">description</span> Articles
       </a>
     </li>
-
-      <li class="sidebar-list-item">
-       <a href="{% url 'dashboard_artwork_list' %}">
-       <span class="material-icons-outlined">photo</span> Artworks
-       </a>
-     </li>
-
-      <li class="sidebar-list-item">
-      <a href="{% url 'dashboard_feedback_list' %}">
-      <span class="material-icons-outlined">rate_review</span> Feedback
+    <li class="sidebar-list-item">
+      <a href="{% url 'dashboard_artwork_list' %}">
+        <span class="material-icons-outlined">photo</span> Artworks
       </a>
     </li>
-
-      <li class="sidebar-list-item">
-        <a href="{% url 'dashboard_material_list' %}">
+    <li class="sidebar-list-item">
+      <a href="{% url 'dashboard_category_list' %}">
+        <span class="material-icons-outlined">category</span> Categories
+      </a>
+    </li>
+    <li class="sidebar-list-item">
+      <a href="{% url 'dashboard_material_list' %}">
         <span class="material-icons-outlined">build</span> Materials
-        </a>
-      </li>
-
-      <li class="sidebar-list-item">
-        <a href="{% url 'dashboard_workshop_list' %}">
-        <span class="material-icons-outlined">school</span> Workshops
-        </a>
-      </li>
-
-      <li class="sidebar-list-item">
-      <a href="{% url 'index' %}">
-        <span class="material-icons-outlined">home</span> Home page
       </a>
     </li>
 
+    <!-- ANALYTICS -->
+    <li class="sidebar-section-title">Statistics</li>
+    <li class="sidebar-list-item">
+      <a href="{% url 'dashboard_user_stats' %}">
+        <span class="material-icons-outlined">insert_chart</span> Users Stats
+      </a>
+    </li>
+    <li class="sidebar-list-item">
+      <a href="{% url 'dashboard_event_stats' %}">
+        <span class="material-icons-outlined">insert_chart</span> Events Stats
+      </a>
+    </li>
+    <li class="sidebar-list-item">
+      <a href="{% url 'dashboard_workshop_stats' %}">
+        <span class="material-icons-outlined">insert_chart</span> Workshops Stats
+      </a>
+    </li>
+    <li class="sidebar-list-item">
+      <a href="{% url 'dashboard_article_stats' %}">
+        <span class="material-icons-outlined">insert_chart</span> Articles Stats
+      </a>
+    </li>
+    <li class="sidebar-list-item">
+      <a href="{% url 'dashboard_artwork_stats' %}">
+        <span class="material-icons-outlined">insert_chart</span> Artworks Stats
+      </a>
+    </li>
+
+    <!-- NAVIGATION -->
+    <li class="sidebar-section-title">Navigation</li>
+    <li class="sidebar-list-item">
+      <a href="{% url 'index' %}">
+        <span class="material-icons-outlined">home</span> Home Page
+      </a>
+    </li>
     <li class="sidebar-list-item">
       <a href="{% url 'logout' %}">
         <span class="material-icons-outlined">logout</span> Logout
       </a>
     </li>
-
-
-
-
-
   </ul>
 </aside>

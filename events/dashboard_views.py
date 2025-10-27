@@ -10,6 +10,9 @@ import openpyxl
 from openpyxl.utils import get_column_letter
 from django.http import HttpResponse
 from openpyxl.styles import Font
+from django.utils import timezone
+from django.db.models import Count
+from django.db.models.functions import TruncMonth
 
 def staff_only(request):
     return request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)
@@ -269,3 +272,54 @@ def place_export_excel_view(request):
 
     wb.save(response)
     return response
+
+
+
+# ------ Statistics ------
+@login_required
+def event_stats_view(request):
+    if not staff_only(request):
+        return redirect('profile')
+
+    now = timezone.now()
+
+    # base queryset (we'll reuse it a lot)
+    qs = Event.objects.select_related('place').all()
+
+    total_events = qs.count()
+    published_events = qs.filter(is_published=True).count()
+    unpublished_events = qs.filter(is_published=False).count()
+
+    upcoming_events = qs.filter(start_date__gte=now).count()
+    past_events = qs.filter(end_date__lt=now).count()
+
+    # events per place, sorted by most events first
+    events_by_place = (
+        qs.values('place__id', 'place__name')
+          .annotate(event_count=Count('id'))
+          .order_by('-event_count', 'place__name')
+    )
+    # shape: [{'place__id': 3, 'place__name': 'Town Hall', 'event_count': 12}, ...]
+
+    # events per month (based on start_date)
+    # we'll take last 12 months including this month
+    events_by_month = (
+        qs.annotate(month=TruncMonth('start_date'))
+          .values('month')
+          .annotate(event_count=Count('id'))
+          .order_by('month')
+    )
+    # shape: [{'month': datetime(2025, 1, 1, 0, 0, tzinfo=...), 'event_count': 7}, ...]
+
+    context = {
+        'total_events': total_events,
+        'published_events': published_events,
+        'unpublished_events': unpublished_events,
+        'upcoming_events': upcoming_events,
+        'past_events': past_events,
+        'events_by_place': events_by_place,
+        'events_by_month': events_by_month,
+        'now': now,
+    }
+
+    return render(request, 'dashboard/events/event_stats.html', context)

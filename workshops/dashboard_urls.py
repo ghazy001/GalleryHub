@@ -14,4 +14,6 @@ urlpatterns = [
     path('workshops/create/', dashboard_views.workshop_create_view, name='dashboard_workshop_create'),
     path('workshops/<int:workshop_id>/edit/', dashboard_views.workshop_edit_view, name='dashboard_workshop_edit'),
     path('workshops/<int:workshop_id>/delete/', dashboard_views.workshop_delete_view, name='dashboard_workshop_delete'),
+    path('workshops/stats/', dashboard_views.workshop_stats_view, name='dashboard_workshop_stats'),
+
 ]

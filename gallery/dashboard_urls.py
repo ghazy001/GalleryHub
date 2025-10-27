@@ -7,6 +7,7 @@ urlpatterns = [
     path('artworks/create/', dashboard_views.artwork_create_view, name='dashboard_artwork_create'),
     path('artworks/<int:artwork_id>/edit/', dashboard_views.artwork_edit_view, name='dashboard_artwork_edit'),
     path('artworks/<int:artwork_id>/delete/', dashboard_views.artwork_delete_view, name='dashboard_artwork_delete'),
+    path('artworks/stats/', dashboard_views.artwork_stats_view, name='dashboard_artwork_stats'),
 
     # feedback
     path('feedback/', dashboard_views.feedback_list_view, name='dashboard_feedback_list'),

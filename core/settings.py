@@ -47,7 +47,8 @@ INSTALLED_APPS = [
     "events",
     "blog",
     "gallery",
-    "workshops"
+    "workshops",
+    "django.contrib.humanize"
 
 ]
 
@@ -155,3 +156,11 @@ AUTH_USER_MODEL = 'accounts.User'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+
+
+
+
+DEEPAI_API_KEY = os.getenv("DEEPAI_API_KEY", "dev-temp-key")
+
+

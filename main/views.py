@@ -1,17 +1,22 @@
-
-from django.shortcuts import render
-from django.shortcuts import render, get_object_or_404
 from events.models import Event
-from django.utils.timezone import now
-from blog.models import Article, Category
-from django.shortcuts import render, get_object_or_404, redirect
-from django.utils import timezone
+from blog.models import Article
+from django.shortcuts import  redirect
 from gallery.models import Artwork, ArtworkFeedback
-from gallery.forms import ArtworkFeedbackForm
 from django.contrib import messages
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import  get_object_or_404
 from django.utils import timezone
 from workshops.models import Workshop
+from .forms import ImageGenerateForm
+import requests
+from django.shortcuts import render
+from django.conf import settings
+from .forms import ImageGenerateForm, BackgroundRemoveForm , ImageEditorForm
+from django.conf import settings
+import requests
+from django.utils import timezone
+from django.shortcuts import render, redirect
+from django.contrib import messages
+
 
 def index(request):
     return render(request, 'main/index.html')
@@ -184,3 +189,156 @@ def public_workshop_detail_view(request, workshop_id):
     return render(request, 'main/workshops/public_workshop_detail.html', {
         'workshop': workshop
     })
+
+
+
+
+
+# ---------------------- image generation --------------------------
+
+
+
+def ai_image_generator_page(request):
+    image_url = None
+    error = None
+
+    print("DEBUG KEY:", settings.DEEPAI_API_KEY)
+
+    if request.method == "POST":
+        form = ImageGenerateForm(request.POST)
+        if form.is_valid():
+            prompt = form.cleaned_data["prompt"]
+
+            try:
+                resp = requests.post(
+                    "https://api.deepai.org/api/text2img",
+                    data={'text': prompt},
+                    headers={'api-key': settings.DEEPAI_API_KEY},
+                    timeout=30,
+                )
+                resp.raise_for_status()
+                data = resp.json()
+
+                image_url = data.get("output_url")
+                if not image_url:
+                    error = "The AI did not return an image. Try another prompt."
+
+            except requests.exceptions.RequestException as e:
+                error = f"Request failed: {e}"
+    else:
+        form = ImageGenerateForm()
+
+    return render(
+        request,
+        "main/Ai/generator.html",
+        {
+            "form": form,
+            "image_url": image_url,
+            "error": error,
+        }
+    )
+
+
+#---------------------- ai background removal --------------------------
+
+def ai_background_remover_page(request):
+    output_url = None
+    error = None
+
+    if request.method == "POST":
+        form = BackgroundRemoveForm(request.POST, request.FILES)
+        if form.is_valid():
+            img_file = form.cleaned_data["image"]
+
+            # choose the key source:
+            # 1. try env (recommended, like before)
+            # 2. fallback hardcoded for dev ONLY
+            api_key = getattr(settings, "DEEPAI_API_KEY", None) or "94242180-9293-4b4f-af09-f9e3fe00b173"
+
+            try:
+                resp = requests.post(
+                    "https://api.deepai.org/api/background-remover",
+                    headers={"api-key": api_key},
+                    files={
+                        "image": (img_file.name, img_file.read())
+                    },
+                    timeout=30,
+                )
+                resp.raise_for_status()
+                data = resp.json()
+
+                # DeepAI usually returns {"output_url": "..."}
+                output_url = data.get("output_url")
+                if not output_url:
+                    error = "The AI did not return a processed image. Try another file."
+
+            except requests.exceptions.RequestException as e:
+                error = f"Request failed: {e}"
+
+        else:
+            error = "Invalid form. Please upload an image."
+    else:
+        form = BackgroundRemoveForm()
+
+    return render(
+        request,
+        "main/Ai/background_remove.html",
+        {
+            "form": form,
+            "output_url": output_url,
+            "error": error,
+        }
+    )
+
+
+#---------------------- ai image editor --------------------------
+def ai_photo_editor_page(request):
+    output_url = None
+    error = None
+
+    if request.method == "POST":
+        form = ImageEditorForm(request.POST, request.FILES)
+        if form.is_valid():
+            img_file = form.cleaned_data["image"]
+            edit_text = form.cleaned_data["text"]
+
+            api_key = getattr(settings, "DEEPAI_API_KEY", None) or "94242180-9293-4b4f-af09-f9e3fe00b173"
+
+            try:
+                resp = requests.post(
+                    "https://api.deepai.org/api/image-editor",
+                    headers={"api-key": api_key},
+                    files={
+                        "image": (img_file.name, img_file.read()),
+                    },
+                    data={
+                        "text": edit_text,
+                    },
+                    timeout=40,
+                )
+                resp.raise_for_status()
+                data = resp.json()
+
+                output_url = data.get("output_url")
+                if not output_url:
+                    error = "The AI did not return an edited image. Try adjusting your edit text."
+
+            except requests.exceptions.RequestException as e:
+                error = f"Request failed: {e}"
+        else:
+            error = "Please provide an image and edit instructions."
+    else:
+        form = ImageEditorForm()
+
+    return render(
+        request,
+        "main/Ai/photo_editor.html",
+        {
+            "form": form,
+            "output_url": output_url,
+            "error": error,
+        }
+    )
+
+
+

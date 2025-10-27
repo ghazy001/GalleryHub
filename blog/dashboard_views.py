@@ -9,6 +9,10 @@ from .forms import CategoryForm, ArticleForm
 import openpyxl
 from openpyxl.utils import get_column_letter
 from django.http import HttpResponse
+from django.utils import timezone
+from django.db.models import Count
+from django.db.models.functions import TruncMonth
+import calendar
 
 
 def staff_only(request):
@@ -279,3 +283,88 @@ def category_export_excel_view(request):
 
     wb.save(response)
     return response
+
+
+
+#-------- STATS --------
+@login_required
+def article_stats_view(request):
+    if not staff_only(request):
+        return redirect('profile')
+
+    now = timezone.now()
+
+    # base queryset
+    qs = (
+        Article.objects
+        .select_related('category', 'author')
+        .all()
+    )
+
+    total_articles = qs.count()
+    published_articles = qs.filter(is_published=True).count()
+    draft_articles = qs.filter(is_published=False).count()
+
+    # recently published metrics
+    # "recent" here = published_at within last 30 days
+    last_30_days = now - timezone.timedelta(days=30)
+    articles_last_30_days = qs.filter(published_at__gte=last_30_days).count()
+
+    # % published
+    published_pct = 0
+    if total_articles > 0:
+        published_pct = round((published_articles / total_articles) * 100)
+
+    # articles per category
+    articles_by_category = (
+        qs.values('category__id', 'category__name')
+          .annotate(article_count=Count('id'))
+          .order_by('-article_count', 'category__name')
+    )
+    # shape: [{'category__id': 1, 'category__name': 'News', 'article_count': 12}, ...]
+
+    # articles per author
+    # we also protect against null author (it’s allowed in your model)
+    articles_by_author = (
+        qs.values('author_id', 'author__username')
+          .annotate(article_count=Count('id'))
+          .order_by('-article_count', 'author__username')
+    )
+    # shape: [{'author_id': 5, 'author__username': 'alice', 'article_count': 7}, ...]
+
+    # articles per month (based on published_at)
+    raw_month_counts = (
+        qs.annotate(month=TruncMonth('published_at'))
+          .values('month')
+          .annotate(article_count=Count('id'))
+          .order_by('month')
+    )
+
+    articles_by_month = []
+    for row in raw_month_counts:
+        month_start = row['month'].date().replace(day=1)
+        last_day_num = calendar.monthrange(month_start.year, month_start.month)[1]
+        month_end = month_start.replace(day=last_day_num)
+
+        articles_by_month.append({
+            'month': row['month'],
+            'article_count': row['article_count'],
+            'range_start': month_start.strftime("%Y-%m-%d"),
+            'range_end': month_end.strftime("%Y-%m-%d"),
+        })
+
+    context = {
+        'now': now,
+
+        'total_articles': total_articles,
+        'published_articles': published_articles,
+        'draft_articles': draft_articles,
+        'articles_last_30_days': articles_last_30_days,
+        'published_pct': published_pct,
+
+        'articles_by_category': articles_by_category,
+        'articles_by_author': articles_by_author,
+        'articles_by_month': articles_by_month,
+    }
+
+    return render(request, 'dashboard/articles/article_stats.html', context)

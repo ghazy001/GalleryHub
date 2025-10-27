@@ -17,7 +17,9 @@ urlpatterns = [
     path('workshops', views.public_workshop_list_view, name='public_workshop_list'),
     path('workshops/<int:workshop_id>/', views.public_workshop_detail_view, name='public_workshop_detail'),
 
-
+    path("ai-image/", views.ai_image_generator_page, name="ai_image_generator"),
+    path("ai-bg-remove/", views.ai_background_remover_page, name="ai_background_remover"),
+    path("ai-photo-editor/", views.ai_photo_editor_page, name="ai_photo_editor"),
 
 
 

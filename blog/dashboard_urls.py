@@ -14,4 +14,6 @@ urlpatterns = [
     path('articles/create/', dashboard_views.article_create_view, name='dashboard_article_create'),
     path('articles/<int:article_id>/edit/', dashboard_views.article_edit_view, name='dashboard_article_edit'),
     path('articles/<int:article_id>/delete/', dashboard_views.article_delete_view, name='dashboard_article_delete'),
+    path('articles/stats/', dashboard_views.article_stats_view, name='dashboard_article_stats'),
+
 ]

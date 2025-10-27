@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <title>Admin Dashboard</title>
+    <title>My Profile</title>
 
     <!-- Montserrat Font -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -12,72 +12,214 @@
     <!-- Material Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
 
-    <!-- Custom CSS -->
+    <!-- Your existing dashboard CSS -->
     <link rel="stylesheet" href="{% static 'dashboard/css/styles.css' %}">
   </head>
   <body>
     <div class="grid-container">
 
-        {% include "dashboard/partials/header.html" %}
-        {% include "dashboard/partials/sidebar.html" %}
+      {% include "dashboard/partials/header.html" %}
+      {% include "dashboard/partials/sidebar.html" %}
 
       <!-- Main -->
       <main class="main-container">
         <div class="main-title">
-          <h2>DASHBOARD</h2>
+          <h2>MY PROFILE</h2>
 
           <p style="font-size:14px;color:#666;margin-top:4px;">
-            Welcome, {{ request.user.username }}
+            Hello, {{ request.user.get_full_name|default:request.user.username }} 👋
           </p>
-
         </div>
 
+        <!-- Top user summary cards -->
         <div class="main-cards">
 
+          <!-- Username -->
           <div class="card">
             <div class="card-inner">
-              <h3>PRODUCTS</h3>
-              <span class="material-icons-outlined">inventory_2</span>
+              <h3>USERNAME</h3>
+              <span class="material-icons-outlined">badge</span>
             </div>
-            <h1>{{ products_count }}</h1>
+            <h1 style="font-size:1.1rem;font-weight:500;">
+              @ {{ request.user.username }}
+            </h1>
           </div>
 
+          <!-- Email -->
           <div class="card">
             <div class="card-inner">
-              <h3>CATEGORIES</h3>
-              <span class="material-icons-outlined">category</span>
+              <h3>EMAIL</h3>
+              <span class="material-icons-outlined">mail</span>
             </div>
-            <h1>{{ categories_count }}</h1>
+            <h1 style="font-size:1.1rem;font-weight:500;">
+              {{ request.user.email|default:"—" }}
+            </h1>
           </div>
 
+          <!-- Account age -->
           <div class="card">
             <div class="card-inner">
-              <h3>CUSTOMERS</h3>
-              <span class="material-icons-outlined">groups</span>
+              <h3>MEMBER SINCE</h3>
+              <span class="material-icons-outlined">calendar_month</span>
             </div>
-            <h1>{{ customers_count }}</h1>
+            <h1 style="font-size:1.1rem;font-weight:500;">
+              {{ request.user.date_joined|date:"F j, Y" }}
+            </h1>
           </div>
 
+          <!-- Last login -->
           <div class="card">
             <div class="card-inner">
-              <h3>ALERTS</h3>
-              <span class="material-icons-outlined">notification_important</span>
+              <h3>LAST LOGIN</h3>
+              <span class="material-icons-outlined">schedule</span>
             </div>
-            <h1>{{ alerts_count }}</h1>
+            <h1 style="font-size:1.1rem;font-weight:500;">
+              {% if request.user.last_login %}
+                {{ request.user.last_login|timesince }} ago
+              {% else %}
+                Never
+              {% endif %}
+            </h1>
           </div>
 
         </div>
 
+        <!-- Detailed profile section -->
         <div class="charts">
 
+          <!-- Left card (profile / avatar / bio) -->
           <div class="charts-card">
-            <h2 class="chart-title">Top 5 Products</h2>
-            <div id="bar-chart"></div>
+            <h2 class="chart-title">Profile Details</h2>
+
+            <div style="display:flex;align-items:flex-start;gap:1rem;flex-wrap:wrap;">
+
+              <!-- avatar -->
+              <div style="width:80px;height:80px;border-radius:50%;overflow:hidden;flex-shrink:0;border:3px solid #ddd;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#4f46e5,#3b82f6);color:#fff;font-weight:600;font-size:1rem;text-transform:uppercase;">
+                {% if request.user.avatar %}
+                  <img src="{{ request.user.avatar.url }}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;">
+                {% else %}
+                  {{ request.user.first_name|default:request.user.username|slice:":1" }}{{ request.user.last_name|slice:":1" }}
+                {% endif %}
+              </div>
+
+              <!-- basic identity -->
+              <div style="min-width:200px;">
+
+                <div style="font-size:0.9rem;color:white;">
+                  @ {{ request.user.username }}
+                </div>
+
+                <!-- role / status -->
+                <div style="font-size:0.75rem;font-weight:600;margin-top:6px;display:flex;flex-wrap:wrap;gap:.5rem;">
+
+                  {% if request.user.is_superuser %}
+                    <span style="background:#d97706;color:#fff;border-radius:4px;padding:2px 6px;display:inline-flex;align-items:center;gap:4px;">
+                      <span class="material-icons-outlined" style="font-size:14px;">security</span>
+                      Superuser
+                    </span>
+                  {% elif request.user.is_staff %}
+                    <span style="background:#4f46e5;color:#fff;border-radius:4px;padding:2px 6px;display:inline-flex;align-items:center;gap:4px;">
+                      <span class="material-icons-outlined" style="font-size:14px;">admin_panel_settings</span>
+                      Staff
+                    </span>
+                  {% else %}
+                    <span style="background:#16a34a;color:#fff;border-radius:4px;padding:2px 6px;display:inline-flex;align-items:center;gap:4px;">
+                      <span class="material-icons-outlined" style="font-size:14px;">person</span>
+                      User
+                    </span>
+                  {% endif %}
+
+                  {% if request.user.is_banned %}
+                    <span style="background:#dc2626;color:#fff;border-radius:4px;padding:2px 6px;display:inline-flex;align-items:center;gap:4px;">
+                      <span class="material-icons-outlined" style="font-size:14px;">block</span>
+                      Banned
+                    </span>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <!-- bio -->
+            <div style="margin-top:1rem;font-size:0.9rem;color:#555;line-height:1.4;">
+              <div style="font-weight:600;font-size:0.8rem;color:white;letter-spacing:.03em;text-transform:uppercase;margin-bottom:4px;">
+                Bio : {% if request.user.bio %}
+              </div>
+
+                <div style="background:#fafafa;border-left:3px solid #4f46e5;padding:.75rem 1rem;border-radius:4px;">
+                  {{ request.user.bio }}
+                </div>
+              {% else %}
+                <div style="background:#fafafa;border-left:3px solid #aaa;padding:.75rem 1rem;border-radius:4px;color:#888;font-style:italic;">
+                  No bio added yet.
+                </div>
+              {% endif %}
+            </div>
+
           </div>
 
+          <!-- Right card (account flags / permissions info) -->
           <div class="charts-card">
-            <h2 class="chart-title">Purchase and Sales Orders</h2>
-            <div id="area-chart"></div>
+            <h2 class="chart-title">Account Status</h2>
+
+            <div style="font-size:0.9rem;color:white;line-height:1.6;">
+              <div style="margin-bottom:.75rem;">
+                <strong>Active:</strong>
+                {% if request.user.is_active %}
+                  Active
+                {% else %}
+                  Disabled
+                {% endif %}
+              </div>
+
+              <div style="margin-bottom:.75rem;">
+                <strong>Staff access:</strong>
+                {% if request.user.is_staff %}
+                  Yes (can access admin tools)
+                {% else %}
+                  No
+                {% endif %}
+              </div>
+
+              <div style="margin-bottom:.75rem;">
+                <strong>Superuser:</strong>
+                {% if request.user.is_superuser %}
+                  Yes (full permissions)
+                {% else %}
+                  No
+                {% endif %}
+              </div>
+
+              <div style="margin-bottom:.75rem;">
+                <strong>Groups:</strong>
+                {% with groups_list=request.user.groups.all %}
+                  {% if groups_list %}
+                    {% for g in groups_list %}
+                      {{ g.name }}{% if not forloop.last %}, {% endif %}
+                    {% empty %}
+                      —
+                    {% endfor %}
+                  {% else %}
+                    —
+                  {% endif %}
+                {% endwith %}
+              </div>
+
+              <div style="margin-bottom:.75rem;">
+                <strong>Permissions count:</strong>
+                {% with perms_list=request.user.get_all_permissions %}
+                  {{ perms_list|length }}
+                {% endwith %}
+              </div>
+
+              <div style="margin-bottom:.75rem;">
+                <strong>Banned:</strong>
+                {% if request.user.is_banned %}
+                  Yes
+                {% else %}
+                  No
+                {% endif %}
+              </div>
+            </div>
           </div>
 
         </div>
@@ -86,10 +228,7 @@
 
     </div>
 
-    <!-- ApexCharts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/apexcharts/3.35.5/apexcharts.min.js"></script>
-
-    <!-- Custom JS -->
+    <!-- Keep your existing JS -->
     <script src="{% static 'dashboard/js/scripts.js' %}"></script>
   </body>
 </html>

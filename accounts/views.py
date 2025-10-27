@@ -3,6 +3,8 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.conf import settings
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
 
 from .forms import RegisterForm, LoginForm, ProfileUpdateForm
 from .models import User
@@ -97,3 +99,25 @@ def delete_account_view(request):
 
     # simple confirm page
     return render(request, 'accounts/delete_confirm.html')
+
+
+
+@login_required
+def password_change_view(request):
+    # block banned users too, same rule as profile_edit
+    if request.user.is_banned:
+        return render(request, 'accounts/banned.html', {"user": request.user})
+
+    if request.method == "POST":
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()  # this updates the password AND hashes it
+            # keep the user logged in after password change
+            update_session_auth_hash(request, user)
+
+            messages.success(request, "Your password has been updated.")
+            return redirect('profile')
+    else:
+        form = PasswordChangeForm(request.user)
+
+    return render(request, 'accounts/password_change.html', {"form": form})

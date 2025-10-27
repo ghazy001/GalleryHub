@@ -9,6 +9,10 @@ import openpyxl
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Font
 from django.http import HttpResponse
+from django.db.models import Count, Avg
+from django.db.models.functions import TruncMonth
+from django.utils import timezone
+import calendar
 
 
 from .models import Workshop, Material
@@ -281,3 +285,99 @@ def material_export_excel_view(request):
 
     wb.save(response)
     return response
+
+
+
+#-------- Stats View --------
+@login_required
+def workshop_stats_view(request):
+    if not staff_only(request):
+        return redirect('profile')
+
+    now = timezone.now()
+
+    # base queryset
+    qs = (
+        Workshop.objects
+        .select_related('place')
+        .prefetch_related('materials')
+        .all()
+    )
+
+    total_workshops = qs.count()
+    active_workshops = qs.filter(is_active=True).count()
+    inactive_workshops = qs.filter(is_active=False).count()
+
+    upcoming_workshops = qs.filter(start_time__gte=now).count()
+    past_workshops = qs.filter(end_time__lt=now).count()
+
+    # avoid None in template: round avg capacity
+    avg_capacity_val = qs.aggregate(avg_cap=Avg('capacity'))['avg_cap']
+    if avg_capacity_val is None:
+        avg_capacity = 0
+    else:
+        # round to nearest int
+        avg_capacity = round(avg_capacity_val)
+
+    # % active
+    active_pct = 0
+    if total_workshops > 0:
+        active_pct = round((active_workshops / total_workshops) * 100)
+
+    # workshops per place
+    workshops_by_place = (
+        qs.values('place__id', 'place__name')
+          .annotate(workshop_count=Count('id'))
+          .order_by('-workshop_count', 'place__name')
+    )
+    # shape: [{'place__id': 3, 'place__name': 'Library', 'workshop_count': 5}, ...]
+
+    # workshops per month (by start_time)
+    raw_month_counts = (
+        qs.annotate(month=TruncMonth('start_time'))
+          .values('month')
+          .annotate(workshop_count=Count('id'))
+          .order_by('month')
+    )
+
+    workshops_by_month = []
+    for row in raw_month_counts:
+        month_start = row['month'].date().replace(day=1)
+        last_day_num = calendar.monthrange(month_start.year, month_start.month)[1]
+        month_end = month_start.replace(day=last_day_num)
+
+        workshops_by_month.append({
+            'month': row['month'],
+            'workshop_count': row['workshop_count'],
+            'range_start': month_start.strftime("%Y-%m-%d"),
+            'range_end': month_end.strftime("%Y-%m-%d"),
+        })
+
+    # top materials usage
+    # Count how many workshops each material is attached to
+    materials_usage = (
+        Material.objects
+        .annotate(usage_count=Count('workshops'))
+        .filter(usage_count__gt=0)
+        .order_by('-usage_count', 'name')
+    )
+    # We'll show just the top ~10 in template, but we'll pass full list
+    # so you can decide in the template.
+
+    context = {
+        'now': now,
+
+        'total_workshops': total_workshops,
+        'active_workshops': active_workshops,
+        'inactive_workshops': inactive_workshops,
+        'upcoming_workshops': upcoming_workshops,
+        'past_workshops': past_workshops,
+        'avg_capacity': avg_capacity,
+        'active_pct': active_pct,
+
+        'workshops_by_place': workshops_by_place,
+        'workshops_by_month': workshops_by_month,
+        'materials_usage': materials_usage,
+    }
+
+    return render(request, 'dashboard/workshops/workshop_stats.html', context)

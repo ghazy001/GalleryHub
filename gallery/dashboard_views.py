@@ -9,6 +9,11 @@ import openpyxl
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Font, PatternFill
 from django.http import HttpResponse
+from django.db.models import Count, Avg, Q, F
+from django.db.models.functions import TruncDate
+from django.utils import timezone
+import json
+from collections import defaultdict
 
 
 
@@ -293,3 +298,125 @@ def feedback_export_excel_view(request):
 
     wb.save(response)
     return response
+
+
+
+# ------------ STATS ------------
+
+@login_required
+def artwork_stats_view(request):
+    if not staff_only(request):
+        return redirect('profile')
+
+    now = timezone.now()
+
+    # ---------- BASE QS ----------
+    artworks_qs = Artwork.objects.all()
+    feedback_qs = ArtworkFeedback.objects.select_related('artwork').all()
+
+    total_artworks = artworks_qs.count()
+    visible_artworks = artworks_qs.filter(is_visible=True).count()
+    hidden_artworks = artworks_qs.filter(is_visible=False).count()
+
+    # recently added: last 30 days
+    last_30_days = now - timezone.timedelta(days=30)
+    new_last_30_days = artworks_qs.filter(created_at__gte=last_30_days).count()
+
+    # feedback stats
+    total_feedback = feedback_qs.count()
+    approved_feedback = feedback_qs.filter(is_approved=True).count()
+
+    # average rating (only approved, since that's what you'd actually show publicly)
+    avg_rating_val = (
+        feedback_qs
+        .filter(is_approved=True, rating__isnull=False)
+        .aggregate(avg_rating=Avg('rating'))
+        ['avg_rating']
+    )
+    avg_rating = round(avg_rating_val, 2) if avg_rating_val is not None else 0
+
+    # top artworks by avg rating (only consider approved feedback, and only those with >=1 approved feedback)
+    top_rated_artworks = (
+        Artwork.objects
+        .annotate(
+            approved_feedback_count=Count('feedbacks', filter=Q(feedbacks__is_approved=True)),
+            avg_rating=Avg('feedbacks__rating', filter=Q(feedbacks__is_approved=True, feedbacks__rating__isnull=False)),
+        )
+        .filter(approved_feedback_count__gt=0)
+        .order_by('-avg_rating', '-approved_feedback_count', 'title')[:10]
+    )
+
+    # artworks most commented overall
+    most_commented_artworks = (
+        Artwork.objects
+        .annotate(fb_count=Count('feedbacks'))
+        .filter(fb_count__gt=0)
+        .order_by('-fb_count', 'title')[:10]
+    )
+
+    # --------- CHART DATA 1: Artworks per "year" ---------
+    # year is a CharField (e.g. "1889", "c. 5th century BC", etc.)
+    # We'll count by exact string. We'll take top ~10 most common "years".
+    artworks_per_year_raw = (
+        artworks_qs
+        .values('year')
+        .annotate(cnt=Count('id'))
+        .order_by('-cnt', 'year')
+    )
+
+    # Keep only non-empty and take first 10 buckets
+    artworks_per_year = [row for row in artworks_per_year_raw if row['year'].strip()][:10]
+
+    chart_year_labels = [row['year'] for row in artworks_per_year]
+    chart_year_counts = [row['cnt'] for row in artworks_per_year]
+
+    # --------- CHART DATA 2: Feedback per day (last 14 days) ---------
+    last_14_days = now - timezone.timedelta(days=14)
+    fb_last_14 = (
+        feedback_qs
+        .filter(created_at__gte=last_14_days)
+        .annotate(day=TruncDate('created_at'))
+        .values('day')
+        .annotate(cnt=Count('id'))
+        .order_by('day')
+    )
+
+    # build complete series (even days with 0)
+    fb_counts_by_day = {row['day'].isoformat(): row['cnt'] for row in fb_last_14}
+    timeline_labels = []
+    timeline_counts = []
+    for i in range(15):  # inclusive today
+        d = (last_14_days + timezone.timedelta(days=i)).date()
+        key = d.isoformat()
+        timeline_labels.append(key)
+        timeline_counts.append(fb_counts_by_day.get(key, 0))
+
+    # We'll serialize chart data into JSON for safe embedding into the template.
+    chart_context = {
+        'chart_year_labels': json.dumps(chart_year_labels),
+        'chart_year_counts': json.dumps(chart_year_counts),
+        'timeline_labels': json.dumps(timeline_labels),
+        'timeline_counts': json.dumps(timeline_counts),
+    }
+
+    context = {
+        'now': now,
+
+        # KPIs
+        'total_artworks': total_artworks,
+        'visible_artworks': visible_artworks,
+        'hidden_artworks': hidden_artworks,
+        'new_last_30_days': new_last_30_days,
+        'total_feedback': total_feedback,
+        'approved_feedback': approved_feedback,
+        'avg_rating': avg_rating,
+
+        # tables
+        'top_rated_artworks': top_rated_artworks,
+        'most_commented_artworks': most_commented_artworks,
+
+        # charts (as JSON strings ready for JS)
+        **chart_context,
+    }
+
+    return render(request, 'dashboard/artwork/artwork_stats.html', context)

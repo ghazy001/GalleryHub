@@ -7,6 +7,9 @@ import openpyxl
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Font
 from django.http import HttpResponse
+from django.utils import timezone
+from django.db.models import Count
+from datetime import timedelta
 
 
 # Only staff/superusers can access this
@@ -149,3 +152,63 @@ def user_export_excel_view(request):
 
     wb.save(response)
     return response
+
+
+# ----- USER STATS -----
+
+@login_required
+def user_stats_view(request):
+    # only staff/superuser allowed
+    if not (request.user.is_staff or request.user.is_superuser):
+        return redirect('profile')
+
+    now = timezone.now()
+
+    qs = User.objects.all()
+
+    total_users = qs.count()
+    staff_users = qs.filter(is_staff=True).count()
+    super_users = qs.filter(is_superuser=True).count()
+    banned_users = qs.filter(is_banned=True).count()
+    active_users = qs.filter(is_banned=False).count()  # "active" in your sense, not Django is_active
+
+    # % banned
+    banned_pct = 0
+    if total_users > 0:
+        banned_pct = round((banned_users / total_users) * 100)
+
+    # new signups in last 30 days
+    last_30_days = now - timedelta(days=30)
+    new_last_30_days = qs.filter(date_joined__gte=last_30_days).count()
+
+    # recently joined (top 10 newest accounts)
+    # NOTE: a brand-new AbstractUser has date_joined by default
+    recent_users = (
+        qs.order_by('-date_joined')
+          .values('id', 'username', 'email', 'date_joined', 'is_banned', 'is_staff', 'is_superuser')[:10]
+    )
+
+    # staff breakdown
+    staff_breakdown = (
+        qs.values('is_staff', 'is_superuser')
+          .annotate(user_count=Count('id'))
+          .order_by('-user_count')
+    )
+    # shape: [{'is_staff': True, 'is_superuser': False, 'user_count': 4}, ...]
+
+    context = {
+        'now': now,
+
+        'total_users': total_users,
+        'staff_users': staff_users,
+        'super_users': super_users,
+        'banned_users': banned_users,
+        'active_users': active_users,
+        'banned_pct': banned_pct,
+        'new_last_30_days': new_last_30_days,
+
+        'recent_users': recent_users,
+        'staff_breakdown': staff_breakdown,
+    }
+
+    return render(request, 'dashboard/users/user_stats.html', context)
